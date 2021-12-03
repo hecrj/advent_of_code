@@ -15,7 +15,20 @@ main = do
         epsilonRate =
             map inverse gammaRate
 
+        oxygenGeneratorRating =
+            computeByBitCriteria oxygenGeneratorCriteria report
+
+        co2ScrubberRating =
+            computeByBitCriteria co2ScrubberCriteria report
+
+        oxygenGeneratorCriteria =
+            mostCommonBit One
+
+        co2ScrubberCriteria =
+            inverse . oxygenGeneratorCriteria
+
     putStrLn $ show (toDecimal gammaRate * toDecimal epsilonRate)
+    putStrLn $ show (toDecimal oxygenGeneratorRating * toDecimal co2ScrubberRating)
 
 
 data Bit
@@ -38,16 +51,37 @@ parseBits =
 
 computeGammaRate :: [[Bit]] -> [Bit]
 computeGammaRate =
-    map mostCommonBit . transpose
+    map (mostCommonBit tie) . transpose
     where
-        mostCommonBit bits
-            | length (ones bits) == length (zeroes bits) =
-                error "Invalid report!"
-            | length (ones bits) > length (zeroes bits) =
-                One
-            | otherwise =
-                Zero
+        tie =
+            error "Invalid report!"
 
+
+computeByBitCriteria :: ([Bit] -> Bit) -> [[Bit]] -> [Bit]
+computeByBitCriteria =
+    helper 0
+    where
+        helper _ _ [] =
+            error "Run out of values!"
+        helper _ _ [ n ] =
+            n
+        helper i criteria list =
+            let
+                selectedBit =
+                    criteria ((transpose list) !! i)
+            in
+            helper (i + 1) criteria (filter (\n -> n !! i == selectedBit) list)
+
+
+mostCommonBit :: Bit -> [Bit] -> Bit
+mostCommonBit tie bits
+    | length (ones bits) == length (zeroes bits) =
+        tie
+    | length (ones bits) > length (zeroes bits) =
+        One
+    | otherwise =
+        Zero
+    where
         ones =
             filter ((==) One)
 
