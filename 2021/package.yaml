@@ -34,6 +34,7 @@ executables:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+
   02-dive:
     main:                Main.hs
     source-dirs:         app/02-dive
@@ -43,3 +44,11 @@ executables:
     - -with-rtsopts=-N
     dependencies:
       - split >= 0.2
+
+  03-binary-diagnostic:
+    main:                Main.hs
+    source-dirs:         app/03-binary-diagnostic
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N

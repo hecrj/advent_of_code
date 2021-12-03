@@ -45,3 +45,14 @@ executable 02-dive
       base >=4.7 && <5
     , split >=0.2
   default-language: Haskell2010
+
+executable 03-binary-diagnostic
+  main-is: Main.hs
+  other-modules:
+      Paths_advent_of_code_y2021
+  hs-source-dirs:
+      app/03-binary-diagnostic
+  ghc-options: -W -Werror -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+  default-language: Haskell2010
