@@ -11,18 +11,21 @@ data Direction
 
 
 data Position
-    = Position { x :: Int, depth :: Int }
+    = Position { x :: Int, depth :: Int, aim :: Int }
 
 
 main :: IO ()
 main = do
     directions <- fmap (catMaybes . map parseDirection . lines) getContents
-
-    let
-        Position x depth =
-            foldl move (Position 0 0) directions
-
-    putStrLn (show (x * depth))
+    putStrLn $ show (result move directions)
+    putStrLn $ show (result move2 directions)
+    where
+        result f directions =
+            let
+                Position x depth _ =
+                    foldl f (Position 0 0 0) directions
+            in
+            x * depth
 
 
 parseDirection :: String -> Maybe Direction
@@ -42,9 +45,18 @@ parseDirection s =
 
 
 move :: Position -> Direction -> Position
-move (Position x depth) (Forward n) =
-    Position (x + n) depth
-move (Position x depth) (Down n) =
-    Position x (depth + n)
-move (Position x depth) (Up n) =
-    Position x (depth - n)
+move (Position x depth aim) (Forward n) =
+    Position (x + n) depth aim
+move (Position x depth aim) (Down n) =
+    Position x (depth + n) aim
+move (Position x depth aim) (Up n) =
+    Position x (depth - n) aim
+
+
+move2 :: Position -> Direction -> Position
+move2 (Position x depth aim) (Forward n) =
+    Position (x + n) (depth + (aim * n)) aim
+move2 (Position x depth aim) (Down n) =
+    Position x depth (aim + n)
+move2 (Position x depth aim) (Up n) =
+    Position x depth (aim - n)
