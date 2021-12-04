@@ -52,3 +52,13 @@ executables:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+
+  04-giant-squid:
+    main:                Main.hs
+    source-dirs:         app/04-giant-squid
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+      - split >= 0.2
