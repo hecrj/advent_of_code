@@ -23,6 +23,14 @@ main = do
         Nothing ->
             error "no bingo!"
 
+    case bingoLast boards numbers of
+        Just bingo -> do
+            putStrLn $ show bingo
+            putStrLn $ show (score bingo)
+
+        Nothing ->
+            error "no bingo!"
+
 
 data Board
     = Board [[Cell]]
@@ -69,6 +77,27 @@ bingo boards (number : rest) =
 
         Nothing ->
             bingo newBoards rest
+
+
+bingoLast :: [Board] -> [Int] -> Maybe Bingo
+bingoLast _ [] =
+    Nothing
+bingoLast boards (number : rest) =
+    let
+        newBoards =
+            map (mark number) boards
+    in
+    case filter (not . isWinner) newBoards of
+        [] ->
+            case find isWinner newBoards of
+                Just winner ->
+                    Just (Bingo winner number)
+
+                Nothing ->
+                    error "left boards win at the same time!"
+
+        losingBoards ->
+            bingoLast losingBoards rest
 
 
 mark :: Int -> Board -> Board
