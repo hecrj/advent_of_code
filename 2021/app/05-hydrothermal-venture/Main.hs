@@ -11,17 +11,35 @@ main = do
     lines <- fmap (catMaybes . fmap parseLine . lines) getContents
 
     let
-        grid =
+        grid1 =
+            List.foldr drawLine emptyGrid (List.filter (\p -> isHorizontal p || isVertical p) lines)
+
+        grid2 =
             List.foldr drawLine emptyGrid lines
 
-    putStrLn $ show (overlappingPoints grid)
+    putStrLn $ show (overlappingPoints grid1)
+    putStrLn $ show (overlappingPoints grid2)
 
 
 data Line
     = Horizontal { start :: Point, length :: Int }
     | Vertical { start :: Point, length :: Int }
-
+    | Diagonal { start :: Point, end :: Point }
     deriving Show
+
+
+isHorizontal :: Line -> Bool
+isHorizontal (Horizontal _ _) =
+    True
+isHorizontal _ =
+    False
+
+
+isVertical :: Line -> Bool
+isVertical (Vertical _ _) =
+    True
+isVertical _ =
+    False
 
 
 parseLine :: String -> Maybe Line
@@ -38,7 +56,7 @@ parseLine input =
                             Just $ Horizontal (Point x0 y0) (x1 - x0)
 
                         else
-                            Nothing
+                            Just $ Diagonal (Point x0 y0) (Point x1 y1)
 
                 _ ->
                     error "invalid line input!"
@@ -68,13 +86,29 @@ drawLine line grid =
 
 points :: Line -> [Point]
 points (Horizontal (Point x y) length) =
-    fmap (\x -> Point x y) [x, x + signum length .. x + length]
+    fmap (\x -> Point x y) (enumFromThenTo x (x + signum length) (x + length))
 points (Vertical (Point x y) length) =
-    fmap (Point x) [y, y + signum length .. y + length]
+    fmap (Point x) (enumFromThenTo y (y + signum length) (y + length))
+points (Diagonal (Point x0 y0) (Point x1 y1)) =
+    let
+        distanceX =
+            x1 - x0
+
+        distanceY =
+            y1 - y0
+
+        diagonal =
+            List.zip
+                (enumFromThenTo x0 (x0 + signum distanceX) (x0 + distanceX))
+                (enumFromThenTo y0 (y0 + signum distanceY) (y0 + distanceY))
+    in
+    fmap (\( x, y ) -> Point x y) diagonal
+
 
 apply :: Point -> Grid -> Grid
 apply point (Grid grid) =
     Grid (Map.insert point (fromMaybe 0 (Map.lookup point grid) + 1) grid)
+
 
 overlappingPoints :: Grid -> Int
 overlappingPoints (Grid points) =
