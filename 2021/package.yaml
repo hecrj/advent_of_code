@@ -43,7 +43,7 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-      - split >= 0.2
+      - split
 
   03-binary-diagnostic:
     main:                Main.hs
@@ -61,4 +61,15 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-      - split >= 0.2
+      - split
+
+  05-hydrothermal-venture:
+    main:                Main.hs
+    source-dirs:         app/05-hydrothermal-venture
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+      - split
+      - containers
