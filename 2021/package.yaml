@@ -73,3 +73,13 @@ executables:
     dependencies:
       - split
       - containers
+
+  06-lanternfish:
+    main:                Main.hs
+    source-dirs:         app/06-lanternfish
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+      - split
