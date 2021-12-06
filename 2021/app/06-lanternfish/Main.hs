@@ -1,23 +1,26 @@
 module Main where
 
+import Data.Map.Strict (Map)
 import Data.Maybe
 import qualified Data.List.Split as List
+import qualified Data.Map.Strict as Map
 
 
 main :: IO ()
 main = do
-    lanternfish <- fmap (fmap parseLanternfish . List.splitOn ",") getContents
+    fish <- fmap (fmap parseLanternfish . List.splitOn ",") getContents
 
     let
-        lanternfishByDay =
-            iterate simulate lanternfish
+        oceanByDay =
+            iterate simulate (newOcean fish)
 
-    putStrLn $ show $ length (lanternfishByDay !! 80)
+    putStrLn $ show $ countFish (oceanByDay !! 80)
+    putStrLn $ show $ countFish (oceanByDay !! 256)
 
 
 data Lanternfish
     = Lanternfish Int
-    deriving Show
+    deriving (Eq, Show)
 
 
 parseLanternfish :: String -> Lanternfish
@@ -25,16 +28,37 @@ parseLanternfish =
     Lanternfish . read
 
 
-live :: Lanternfish -> ( Lanternfish, Maybe Lanternfish )
-live (Lanternfish 0) =
-    ( Lanternfish 6, Just (Lanternfish 8) )
-live (Lanternfish n) =
-    ( Lanternfish (n - 1), Nothing )
+data Ocean
+    = Ocean (Map Int Int)
 
 
-simulate :: [Lanternfish] -> [Lanternfish]
-simulate =
-    merge . unzip . fmap live
+newOcean :: [Lanternfish] -> Ocean
+newOcean fish =
+    Ocean (Map.fromList (map count [0..8]))
     where
-        merge ( fish, births ) =
-            concat [ fish, catMaybes births ]
+        count day =
+            ( day, length (filter ((==) (Lanternfish day)) fish) )
+
+
+simulate :: Ocean -> Ocean
+simulate (Ocean current) =
+    let
+        shifted =
+            Map.fromList (map shift [1..8])
+
+        births =
+            fromMaybe 0 (Map.lookup 0 current)
+
+        new =
+            Map.insert 8 births $
+                Map.insert 6 (fromMaybe 0 (Map.lookup 6 shifted) + births) shifted
+    in
+    Ocean new
+    where
+        shift day =
+            ( day - 1, fromMaybe 0 (Map.lookup day current) )
+
+
+countFish :: Ocean -> Int
+countFish (Ocean map) =
+    sum (Map.elems map)
