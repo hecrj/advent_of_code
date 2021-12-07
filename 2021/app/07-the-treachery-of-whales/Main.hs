@@ -37,4 +37,7 @@ x (Crab p) =
 
 fuel :: Int -> [Crab] -> Int
 fuel n =
-    sum . fmap (abs . (-) n . x)
+    sum . fmap (triangular . abs . (-) n . x)
+    where
+        triangular n =
+            (n * (n + 1)) `div` 2
