@@ -94,3 +94,13 @@ executables:
     - -with-rtsopts=-N
     dependencies:
       - split
+
+  08-seven-segment-search:
+    main:                Main.hs
+    source-dirs:         app/08-seven-segment-search
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+      - split

@@ -106,3 +106,15 @@ executable 07-the-treachery-of-whales
       base >=4.7 && <5
     , split
   default-language: Haskell2010
+
+executable 08-seven-segment-search
+  main-is: Main.hs
+  other-modules:
+      Paths_advent_of_code_y2021
+  hs-source-dirs:
+      app/08-seven-segment-search
+  ghc-options: -W -Werror -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , split
+  default-language: Haskell2010
