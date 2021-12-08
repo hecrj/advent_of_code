@@ -104,3 +104,4 @@ executables:
     - -with-rtsopts=-N
     dependencies:
       - split
+      - containers
