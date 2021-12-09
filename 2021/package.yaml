@@ -105,3 +105,15 @@ executables:
     dependencies:
       - split
       - containers
+
+  09-smoke-basin:
+    main:                Main.hs
+    source-dirs:         app/09-smoke-basin
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+      - split
+      - containers
+      - relude

@@ -119,3 +119,17 @@ executable 08-seven-segment-search
     , containers
     , split
   default-language: Haskell2010
+
+executable 09-smoke-basin
+  main-is: Main.hs
+  other-modules:
+      Paths_advent_of_code_y2021
+  hs-source-dirs:
+      app/09-smoke-basin
+  ghc-options: -W -Werror -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , containers
+    , relude
+    , split
+  default-language: Haskell2010
