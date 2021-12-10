@@ -1,6 +1,7 @@
 module Main where
 
 import Data.Set (Set)
+import qualified Data.List as List
 import qualified Data.Set as Set
 
 
@@ -15,6 +16,13 @@ main = do
         Nothing ->
             error "no pair found!"
 
+    case findTriplet 2020 report of
+        Just ( a, b, c ) ->
+            putStrLn $ show (a * b * c)
+
+        Nothing ->
+            error "no triplet found!"
+
 
 findPair :: Int -> [Int] -> Maybe ( Int, Int )
 findPair =
@@ -27,3 +35,15 @@ findPair =
                 Just ( target - candidate, candidate )
             | otherwise =
                 findPair' (Set.insert (target - candidate) visited) target rest
+
+
+findTriplet :: Int -> [Int] -> Maybe ( Int, Int, Int )
+findTriplet target list =
+    List.find (\( a, b, c ) -> a + b + c == target)
+        [
+            ( a, b, c )
+            | a <- list
+            , b <- list
+            , c <- list
+            , a /= b && b /= c && c /= a
+        ]
