@@ -133,3 +133,16 @@ executable 09-smoke-basin
     , relude
     , split
   default-language: Haskell2010
+
+executable 10-syntax-scoring
+  main-is: Main.hs
+  other-modules:
+      Paths_advent_of_code_y2021
+  hs-source-dirs:
+      app/10-syntax-scoring
+  ghc-options: -W -Werror -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , containers
+    , split
+  default-language: Haskell2010
