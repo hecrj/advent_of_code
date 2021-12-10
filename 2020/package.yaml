@@ -32,3 +32,14 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - containers
+
+  02-password-philosophy:
+    main:                Main.hs
+    source-dirs:         app/02-password-philosophy
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - containers
+    - split
