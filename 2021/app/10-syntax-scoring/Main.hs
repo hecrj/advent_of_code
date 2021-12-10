@@ -1,7 +1,10 @@
+{-# LANGUAGE DisambiguateRecordFields #-}
+{-# LANGUAGE DuplicateRecordFields #-}
 module Main where
 
 import Data.Maybe
 import Debug.Trace
+import qualified Data.List as List
 
 
 main :: IO ()
@@ -9,16 +12,25 @@ main = do
     lines <- fmap lines getContents
 
     let
-        errors =
-            catMaybes $ fmap (either (const Nothing) Just . parse) lines
+        results =
+            zip lines $ fmap parse lines
 
-    putStrLn $ show $ sum $ fmap errorScore errors
+        errors f =
+            catMaybes $
+                fmap
+                    (\( input, result ) ->
+                        fmap ((,) input) $ either (const Nothing) Just result >>= f
+                    )
+                    results
 
+        corruptedErrors =
+            errors corrupted
 
-data Error
-    = Corrupted { expected :: Char, actual :: Char }
-    | Incomplete { expected :: Char }
-    deriving Show
+        incompleteErrors =
+            errors incomplete
+
+    putStrLn $ show $ sum $ fmap (corruptedScore . snd) corruptedErrors
+    putStrLn $ show $ middle $ List.sort $ fmap (uncurry incompleteScore) incompleteErrors
 
 
 parse :: String -> Either String Error
@@ -32,22 +44,15 @@ parse (c : rest)
                     parse rest
 
                 else
-                    Right $ Corrupted (closing c) i
+                    Right $ CorruptedError $ Corrupted (closing c) i
 
             Left [] ->
-                Right $ Incomplete (closing c)
+                Right $ IncompleteError $ Incomplete (closing c)
 
             Right e ->
                 Right e
     | otherwise =
         Left (c : rest)
-
-
-errorScore :: Error -> Int
-errorScore (Corrupted _ actual) =
-    score actual
-errorScore (Incomplete _) =
-    0
 
 
 isOpening :: Char -> Bool
@@ -76,19 +81,97 @@ closing _ =
     error "invalid character!"
 
 
-score :: Char -> Int
-score ')' =
-    3
-score ']' =
-    57
-score '}' =
-    1197
-score '>' =
-    25137
-score _ =
-    error "invalid character!"
+data Error
+    = CorruptedError Corrupted
+    | IncompleteError Incomplete
+    deriving Show
+
+
+corrupted :: Error -> Maybe Corrupted
+corrupted (CorruptedError c) =
+    Just c
+corrupted (IncompleteError _) =
+    Nothing
+
+
+incomplete :: Error -> Maybe Incomplete
+incomplete (CorruptedError _) =
+    Nothing
+incomplete (IncompleteError i) =
+    Just i
+
+
+data Corrupted
+    = Corrupted { expected :: Char, actual :: Char }
+    deriving Show
+
+
+corruptedScore :: Corrupted -> Int
+corruptedScore (Corrupted _ actual) =
+    case actual of
+        ')' ->
+            3
+
+        ']' ->
+            57
+
+        '}' ->
+            1197
+
+        '>' ->
+            25137
+
+        _ ->
+            error "invalid character!"
+
+
+data Incomplete
+    = Incomplete { expected :: Char }
+    deriving Show
+
+
+incompleteScore :: String -> Incomplete -> Int
+incompleteScore input incomplete =
+    foldl (\total c -> total * 5 + score c) 0 $
+        missingCharacters input incomplete
+    where
+        score ')' =
+            1
+        score ']' =
+            2
+        score '}' =
+            3
+        score '>' =
+            4
+        score _ =
+            error "invalid character!"
+
+
+missingCharacters :: String -> Incomplete -> String
+missingCharacters input (Incomplete expected) =
+    let
+        candidate =
+            input ++ [ expected ]
+    in
+    case parse candidate of
+        Left [] ->
+            [ expected ]
+
+        Right (IncompleteError i) ->
+            (expected : missingCharacters candidate i)
+
+        Left _ ->
+            error "unexpected leftover input!"
+
+        Right _ ->
+            error "unexpected error!"
 
 
 debug :: Show a => a -> a
 debug a =
     traceShow a a
+
+
+middle :: [a] -> a
+middle list =
+    list !! (length list `div` 2)
