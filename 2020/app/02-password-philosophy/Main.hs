@@ -6,6 +6,7 @@ import qualified Data.List.Split as List
 main :: IO ()
 main = do
     list <- fmap (map parse . lines) getContents
+    putStrLn $ show $ length $ filter (uncurry validateOld) list
     putStrLn $ show $ length $ filter (uncurry validate) list
 
 
@@ -40,6 +41,13 @@ parsePolicy input =
 
 validate :: Policy -> Password -> Bool
 validate (Policy min max letter) (Password password) =
+    (/=)
+        (password !! (min - 1) == letter)
+        (password !! (max - 1) == letter)
+
+
+validateOld :: Policy -> Password -> Bool
+validateOld (Policy min max letter) (Password password) =
     let
         occurrences =
             length $ filter ((==) letter) password
