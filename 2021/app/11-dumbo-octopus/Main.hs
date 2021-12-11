@@ -10,6 +10,7 @@ main :: IO ()
 main = do
     grid <- fmap parseGrid getContents
     putStrLn $ show $ sum $ flashes 100 grid
+    putStrLn $ show $ List.findIndex ((==) 100 . snd) $ simulate grid
 
 
 data Octopus
@@ -56,9 +57,14 @@ withPositions =
         . zip [0..] . fmap (zip [0..])
 
 
+simulate :: Grid -> [( Grid, Int )]
+simulate grid =
+    iterate (flash . fst) ( grid, 0 )
+
+
 flashes :: Int -> Grid -> [Int]
 flashes steps grid =
-    map snd $ take (steps + 1) $ iterate (flash . fst) ( grid, 0 )
+    map snd $ take (steps + 1) $ simulate grid
 
 
 flash :: Grid -> ( Grid, Int )
