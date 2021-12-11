@@ -23,126 +23,16 @@ source-repository head
   type: git
   location: https://github.com/githubuser/advent-of-code-y2021
 
-executable 01-sonar-sweep
+executable 11-dumbo-octopus
   main-is: Main.hs
   other-modules:
       Paths_advent_of_code_y2021
   hs-source-dirs:
-      app/01-sonar-sweep
-  ghc-options: -W -Werror -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      base >=4.7 && <5
-  default-language: Haskell2010
-
-executable 02-dive
-  main-is: Main.hs
-  other-modules:
-      Paths_advent_of_code_y2021
-  hs-source-dirs:
-      app/02-dive
-  ghc-options: -W -Werror -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      base >=4.7 && <5
-    , split
-  default-language: Haskell2010
-
-executable 03-binary-diagnostic
-  main-is: Main.hs
-  other-modules:
-      Paths_advent_of_code_y2021
-  hs-source-dirs:
-      app/03-binary-diagnostic
-  ghc-options: -W -Werror -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      base >=4.7 && <5
-  default-language: Haskell2010
-
-executable 04-giant-squid
-  main-is: Main.hs
-  other-modules:
-      Paths_advent_of_code_y2021
-  hs-source-dirs:
-      app/04-giant-squid
-  ghc-options: -W -Werror -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      base >=4.7 && <5
-    , split
-  default-language: Haskell2010
-
-executable 05-hydrothermal-venture
-  main-is: Main.hs
-  other-modules:
-      Paths_advent_of_code_y2021
-  hs-source-dirs:
-      app/05-hydrothermal-venture
-  ghc-options: -W -Werror -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      base >=4.7 && <5
-    , containers
-    , split
-  default-language: Haskell2010
-
-executable 06-lanternfish
-  main-is: Main.hs
-  other-modules:
-      Paths_advent_of_code_y2021
-  hs-source-dirs:
-      app/06-lanternfish
-  ghc-options: -W -Werror -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      base >=4.7 && <5
-    , containers
-    , split
-  default-language: Haskell2010
-
-executable 07-the-treachery-of-whales
-  main-is: Main.hs
-  other-modules:
-      Paths_advent_of_code_y2021
-  hs-source-dirs:
-      app/07-the-treachery-of-whales
-  ghc-options: -W -Werror -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      base >=4.7 && <5
-    , split
-  default-language: Haskell2010
-
-executable 08-seven-segment-search
-  main-is: Main.hs
-  other-modules:
-      Paths_advent_of_code_y2021
-  hs-source-dirs:
-      app/08-seven-segment-search
-  ghc-options: -W -Werror -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      base >=4.7 && <5
-    , containers
-    , split
-  default-language: Haskell2010
-
-executable 09-smoke-basin
-  main-is: Main.hs
-  other-modules:
-      Paths_advent_of_code_y2021
-  hs-source-dirs:
-      app/09-smoke-basin
+      app/11-dumbo-octopus
   ghc-options: -W -Werror -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
     , containers
     , relude
-    , split
-  default-language: Haskell2010
-
-executable 10-syntax-scoring
-  main-is: Main.hs
-  other-modules:
-      Paths_advent_of_code_y2021
-  hs-source-dirs:
-      app/10-syntax-scoring
-  ghc-options: -W -Werror -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      base >=4.7 && <5
-    , containers
     , split
   default-language: Haskell2010
