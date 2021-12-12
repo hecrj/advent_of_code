@@ -14,7 +14,13 @@ import qualified Data.Tuple as Tuple
 
 day :: AdventOfCode.Day
 day =
-    AdventOfCode.day "Passage Pathing" (length . paths . parse) (const 0)
+    AdventOfCode.day "Passage Pathing" part1 part2
+    where
+        part1 =
+            length . paths smallCavesOnlyOnce . parse
+
+        part2 =
+            length . paths atMostOneSmallCaveTwice . parse
 
 
 data System
@@ -44,25 +50,25 @@ parse =
             Map.insert from (to : connections) map
 
 
-paths :: System -> [[Cave]]
-paths =
-    navigate Start []
+paths :: Strategy -> System -> [[Cave]]
+paths strategy =
+    navigate strategy Start []
 
 
-navigate :: Cave -> [Cave] -> System -> [[Cave]]
-navigate End path _ =
+navigate :: Strategy -> Cave -> [Cave] -> System -> [[Cave]]
+navigate _ End path _ =
     [ reverse (End : path) ]
-navigate next path system@(System map) =
+navigate canNavigate next path system@(System map) =
     let
         connections =
             Maybe.fromMaybe [] $ Map.lookup next map
 
         uniqueConnections =
-            filter (\c -> canRepeat c || not (List.elem c path)) connections
+            filter (flip canNavigate (next : path)) connections
     in
     concat $
         fmap
-            (\connection -> navigate connection (next : path) system)
+            (\connection -> navigate canNavigate connection (next : path) system)
             uniqueConnections
 
 
@@ -86,8 +92,34 @@ parseCave name
         Big name
 
 
-canRepeat :: Cave -> Bool
-canRepeat (Big _) =
+isSmall :: Cave -> Bool
+isSmall (Small _) =
     True
-canRepeat _ =
+isSmall _ =
     False
+
+
+type Strategy = Cave -> [Cave] -> Bool
+
+
+smallCavesOnlyOnce :: Strategy
+smallCavesOnlyOnce (Big _) _ =
+    True
+smallCavesOnlyOnce c path =
+    not (List.elem c path)
+
+
+atMostOneSmallCaveTwice :: Strategy
+atMostOneSmallCaveTwice (Big _) _ =
+    True
+atMostOneSmallCaveTwice cave@(Small _) path =
+    let
+        isRepetitionPresent =
+            any ((> 1) . length) (List.group $ List.sort (filter isSmall path))
+
+        maxOccurrences =
+            if isRepetitionPresent then 1 else 2
+    in
+    length (filter ((==) cave) path) < maxOccurrences
+atMostOneSmallCaveTwice c path =
+    not (List.elem c path)
