@@ -56,7 +56,7 @@ runDays :: [Day] -> IO ()
 runDays days = do
     let
         maxTitle =
-            length $ maximum (fmap title days)
+            maximum $ fmap (length . title) days
 
         columns =
             [ "Day"

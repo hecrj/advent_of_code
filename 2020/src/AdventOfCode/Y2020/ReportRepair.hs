@@ -1,34 +1,36 @@
-module Main where
+module AdventOfCode.Y2020.ReportRepair
+    ( day
+    ) where
 
-import Data.Set (Set)
+import Data.Maybe
+import qualified AdventOfCode
 import qualified Data.List as List
 import qualified Data.Set as Set
 
 
-main :: IO ()
-main = do
-    report <- fmap (fmap read . lines) getContents
+day :: AdventOfCode.Day
+day =
+    AdventOfCode.day "Report Repair" part1 part2
+    where
+        part1 =
+            uncurry (*)
+                . fromMaybe (error "pair not found!")
+                    . findPair 2020 . map read . lines
 
-    case findPair 2020 report of
-        Just ( a, b ) ->
-            putStrLn $ show (a * b)
+        part2 =
+            product
+                . fromMaybe (error "tripler not found!")
+                    . findTriplet 2020 . map read . lines
 
-        Nothing ->
-            error "no pair found!"
-
-    case findTriplet 2020 report of
-        Just ( a, b, c ) ->
-            putStrLn $ show (a * b * c)
-
-        Nothing ->
-            error "no triplet found!"
+        product ( a, b, c ) =
+            a * b * c
 
 
 findPair :: Int -> [Int] -> Maybe ( Int, Int )
 findPair =
     findPair' Set.empty
     where
-        findPair' visited target [] =
+        findPair' _ _ [] =
             Nothing
         findPair' visited target (candidate : rest)
             | Set.member candidate visited =

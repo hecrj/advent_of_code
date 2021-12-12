@@ -1,13 +1,18 @@
-module Main where
+module AdventOfCode.Y2020.PasswordPhilosophy where
 
+import qualified AdventOfCode
 import qualified Data.List.Split as List
 
 
-main :: IO ()
-main = do
-    list <- fmap (map parse . lines) getContents
-    putStrLn $ show $ length $ filter (uncurry validateOld) list
-    putStrLn $ show $ length $ filter (uncurry validate) list
+day :: AdventOfCode.Day
+day =
+    AdventOfCode.day "Password Philosophy" part1 part2
+    where
+        part1 =
+            length . filter (uncurry validateOld) . map parse . lines
+
+        part2 =
+            length . filter (uncurry validate) . map parse . lines
 
 
 parse :: String -> ( Policy, Password )
