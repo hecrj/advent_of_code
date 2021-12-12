@@ -1,24 +1,21 @@
-module Main where
+module AdventOfCode.Y2021.SmokeBasin where
 
 import Data.Maybe
 import Debug.Trace
 import Relude.List
+import qualified AdventOfCode
 import qualified Data.List as List
 
 
-main :: IO ()
-main = do
-    heightMap <- fmap parseHeightMap getContents
-
-    let
+day :: AdventOfCode.Day
+day =
+    AdventOfCode.day "Smoke Basin" lowPointsScore basinsScore
+    where
         lowPointsScore =
-            sum $ fmap ((+ 1) . height) (lowPoints heightMap)
+            sum . fmap ((+ 1) . height) . lowPoints . parseHeightMap
 
         basinsScore =
-            foldr (*) 1 $ take 3 $ reverse $ sort $ fmap length $ basins heightMap
-
-    putStrLn $ show lowPointsScore
-    putStrLn $ show basinsScore
+            foldr (*) 1 . take 3 . reverse . sort . fmap length . basins . parseHeightMap
 
 
 data HeightMap

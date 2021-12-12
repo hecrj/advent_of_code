@@ -1,17 +1,27 @@
-module Main where
+module AdventOfCode.Y2021.SevenSegmentSearch
+    ( day
+    ) where
 
 import Data.Map.Strict (Map)
 import Data.Maybe
+import qualified AdventOfCode
 import qualified Data.List as List
 import qualified Data.List.Split as List
 import qualified Data.Map.Strict as Map
 
 
-main :: IO ()
-main = do
-    entries <- fmap (fmap parseEntry . lines) getContents
-    putStrLn $ show $ sum (fmap uniqueOutputDigits entries)
-    putStrLn $ show $ sum (fmap translateOutput entries)
+day :: AdventOfCode.Day
+day =
+    AdventOfCode.day "Seven Segment Search" part1 part2
+    where
+        part1 =
+            sum . fmap uniqueOutputDigits . parse
+
+        part2 =
+            sum . fmap translateOutput . parse
+
+        parse =
+            fmap parseEntry . lines
 
 
 data Entry
@@ -120,11 +130,6 @@ isUnique (Pattern signals) =
     length signals `elem` [ 2, 3, 4, 7 ]
 
 
-patternLength :: Pattern -> Int
-patternLength =
-    length . patternSignals
-
-
 patternSignals :: Pattern -> [Signal]
 patternSignals (Pattern signals) =
     signals
@@ -198,8 +203,3 @@ toInt Eight =
     8
 toInt Nine =
     9
-
-
-digitsWithLength :: Int -> [Digit]
-digitsWithLength n =
-    filter (\d -> patternLength (digitPattern d) == n) (enumFrom Zero)

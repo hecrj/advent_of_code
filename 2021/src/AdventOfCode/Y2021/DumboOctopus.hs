@@ -1,16 +1,23 @@
-module Main where
+module AdventOfCode.Y2021.DumboOctopus
+    ( day
+    ) where
 
 import Data.Set (Set)
-import Debug.Trace
+import qualified AdventOfCode
 import qualified Data.List as List
+import qualified Data.Maybe as Maybe
 import qualified Data.Set as Set
 
 
-main :: IO ()
-main = do
-    grid <- fmap parseGrid getContents
-    putStrLn $ show $ sum $ flashes 100 grid
-    putStrLn $ show $ List.findIndex ((==) 100 . snd) $ simulate grid
+day :: AdventOfCode.Day
+day =
+    AdventOfCode.day "Dumbo Octopus" flashesAfter100 syncFlashIndex
+    where
+        flashesAfter100 =
+            sum . flashes 100 . parseGrid
+
+        syncFlashIndex =
+            Maybe.fromJust . List.findIndex ((==) 100 . snd) . simulate . parseGrid
 
 
 data Octopus
@@ -144,8 +151,3 @@ neighbors (Position i j) =
         , nj <- [j - 1..j + 1]
         , ni /= i || nj /= j
     ]
-
-
-debug :: Show a => a -> a
-debug a =
-    traceShow a a

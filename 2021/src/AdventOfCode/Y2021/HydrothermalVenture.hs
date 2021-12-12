@@ -1,24 +1,29 @@
-module Main where
+module AdventOfCode.Y2021.HydrothermalVenture
+    ( day
+    ) where
 
 import Data.List as List
 import Data.List.Split
 import Data.Map.Strict as Map
 import Data.Maybe
+import qualified AdventOfCode
 
 
-main :: IO ()
-main = do
-    lines <- fmap (catMaybes . fmap parseLine . lines) getContents
+day :: AdventOfCode.Day
+day =
+    AdventOfCode.day "Hydrothermal Venture" part1 part2
+    where
+        part1 =
+            overlappingPoints
+                . gridFromLines
+                    . List.filter (\p -> isHorizontal p || isVertical p)
+                        . parse
 
-    let
-        grid1 =
-            List.foldr drawLine emptyGrid (List.filter (\p -> isHorizontal p || isVertical p) lines)
+        part2 =
+            overlappingPoints . gridFromLines . parse
 
-        grid2 =
-            List.foldr drawLine emptyGrid lines
-
-    putStrLn $ show (overlappingPoints grid1)
-    putStrLn $ show (overlappingPoints grid2)
+        parse =
+            catMaybes . fmap parseLine . lines
 
 
 data Line
@@ -77,6 +82,11 @@ data Point
 emptyGrid :: Grid
 emptyGrid =
     Grid Map.empty
+
+
+gridFromLines :: [Line] -> Grid
+gridFromLines =
+    List.foldr drawLine emptyGrid
 
 
 drawLine :: Line -> Grid -> Grid

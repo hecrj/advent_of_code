@@ -23,16 +23,46 @@ source-repository head
   type: git
   location: https://github.com/githubuser/advent-of-code-y2021
 
-executable 11-dumbo-octopus
+library
+  exposed-modules:
+      AdventOfCode
+      AdventOfCode.Y2021
+      AdventOfCode.Y2021.BinaryDiagnostic
+      AdventOfCode.Y2021.Dive
+      AdventOfCode.Y2021.DumboOctopus
+      AdventOfCode.Y2021.GiantSquid
+      AdventOfCode.Y2021.HydrothermalVenture
+      AdventOfCode.Y2021.Lanternfish
+      AdventOfCode.Y2021.SevenSegmentSearch
+      AdventOfCode.Y2021.SmokeBasin
+      AdventOfCode.Y2021.SonarSweep
+      AdventOfCode.Y2021.SyntaxScoring
+      AdventOfCode.Y2021.TheTreacheryOfWhales
+  other-modules:
+      Paths_advent_of_code_y2021
+  hs-source-dirs:
+      src
+  ghc-options: -W -Werror
+  build-depends:
+      base >=4.7 && <5
+    , containers
+    , directory
+    , relude
+    , split
+  default-language: Haskell2010
+
+executable aoc-2021
   main-is: Main.hs
   other-modules:
       Paths_advent_of_code_y2021
   hs-source-dirs:
-      app/11-dumbo-octopus
+      app
   ghc-options: -W -Werror -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      advent-of-code-y2021
+    , base >=4.7 && <5
     , containers
+    , directory
     , relude
     , split
   default-language: Haskell2010

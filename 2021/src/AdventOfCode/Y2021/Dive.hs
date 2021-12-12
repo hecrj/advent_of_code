@@ -1,7 +1,31 @@
-module Main where
+module AdventOfCode.Y2021.Dive
+    ( day
+    ) where
 
 import Data.List.Split
 import Data.Maybe
+import qualified AdventOfCode
+
+
+day :: AdventOfCode.Day
+day =
+    AdventOfCode.day "Dive" part1 part2
+    where
+        part1 =
+            result move . parse
+
+        part2 =
+            result move2 . parse
+
+        parse =
+            catMaybes . map parseDirection . lines
+
+        result f directions =
+            let
+                Position x depth _ =
+                    foldl f (Position 0 0 0) directions
+            in
+            x * depth
 
 
 data Direction
@@ -11,21 +35,7 @@ data Direction
 
 
 data Position
-    = Position { x :: Int, depth :: Int, aim :: Int }
-
-
-main :: IO ()
-main = do
-    directions <- fmap (catMaybes . map parseDirection . lines) getContents
-    putStrLn $ show (result move directions)
-    putStrLn $ show (result move2 directions)
-    where
-        result f directions =
-            let
-                Position x depth _ =
-                    foldl f (Position 0 0 0) directions
-            in
-            x * depth
+    = Position { _x :: Int, _depth :: Int, _aim :: Int }
 
 
 parseDirection :: String -> Maybe Direction

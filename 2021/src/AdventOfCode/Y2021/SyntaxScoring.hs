@@ -1,36 +1,36 @@
 {-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE DuplicateRecordFields #-}
-module Main where
+module AdventOfCode.Y2021.SyntaxScoring where
 
 import Data.Maybe
 import Debug.Trace
+import qualified AdventOfCode
 import qualified Data.List as List
 
 
-main :: IO ()
-main = do
-    lines <- fmap lines getContents
+day :: AdventOfCode.Day
+day =
+    AdventOfCode.day "Syntax Scoring" corruptedScoreSum incompleteScoreMid
+    where
+        corruptedScoreSum =
+            sum
+                . fmap (corruptedScore . snd) . errors corrupted
 
-    let
+        incompleteScoreMid =
+            middle
+                . List.sort
+                    . fmap (uncurry incompleteScore) . errors incomplete
+
         results =
-            zip lines $ fmap parse lines
+            fmap (\input -> ( input, parse input )) . lines
 
         errors f =
-            catMaybes $
-                fmap
+            catMaybes
+                . fmap
                     (\( input, result ) ->
                         fmap ((,) input) $ either (const Nothing) Just result >>= f
                     )
-                    results
-
-        corruptedErrors =
-            errors corrupted
-
-        incompleteErrors =
-            errors incomplete
-
-    putStrLn $ show $ sum $ fmap (corruptedScore . snd) corruptedErrors
-    putStrLn $ show $ middle $ List.sort $ fmap (uncurry incompleteScore) incompleteErrors
+                    . results
 
 
 parse :: String -> Either String Error

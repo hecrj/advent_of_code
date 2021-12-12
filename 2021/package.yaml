@@ -21,121 +21,25 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
+- directory
+- split
+- containers
+- relude
 
 ghc-options:
   - -W
   - -Werror
 
+library:
+  source-dirs: src
+
 executables:
-  # 01-sonar-sweep:
-  #   main:                Main.hs
-  #   source-dirs:         app/01-sonar-sweep
-  #   ghc-options:
-  #   - -threaded
-  #   - -rtsopts
-  #   - -with-rtsopts=-N
-
-  # 02-dive:
-  #   main:                Main.hs
-  #   source-dirs:         app/02-dive
-  #   ghc-options:
-  #   - -threaded
-  #   - -rtsopts
-  #   - -with-rtsopts=-N
-  #   dependencies:
-  #     - split
-
-  # 03-binary-diagnostic:
-  #   main:                Main.hs
-  #   source-dirs:         app/03-binary-diagnostic
-  #   ghc-options:
-  #   - -threaded
-  #   - -rtsopts
-  #   - -with-rtsopts=-N
-
-  # 04-giant-squid:
-  #   main:                Main.hs
-  #   source-dirs:         app/04-giant-squid
-  #   ghc-options:
-  #   - -threaded
-  #   - -rtsopts
-  #   - -with-rtsopts=-N
-  #   dependencies:
-  #     - split
-
-  # 05-hydrothermal-venture:
-  #   main:                Main.hs
-  #   source-dirs:         app/05-hydrothermal-venture
-  #   ghc-options:
-  #   - -threaded
-  #   - -rtsopts
-  #   - -with-rtsopts=-N
-  #   dependencies:
-  #     - split
-  #     - containers
-
-  # 06-lanternfish:
-  #   main:                Main.hs
-  #   source-dirs:         app/06-lanternfish
-  #   ghc-options:
-  #   - -threaded
-  #   - -rtsopts
-  #   - -with-rtsopts=-N
-  #   dependencies:
-  #     - split
-  #     - containers
-
-  # 07-the-treachery-of-whales:
-  #   main:                Main.hs
-  #   source-dirs:         app/07-the-treachery-of-whales
-  #   ghc-options:
-  #   - -threaded
-  #   - -rtsopts
-  #   - -with-rtsopts=-N
-  #   dependencies:
-  #     - split
-
-  # 08-seven-segment-search:
-  #   main:                Main.hs
-  #   source-dirs:         app/08-seven-segment-search
-  #   ghc-options:
-  #   - -threaded
-  #   - -rtsopts
-  #   - -with-rtsopts=-N
-  #   dependencies:
-  #     - split
-  #     - containers
-
-  # 09-smoke-basin:
-  #   main:                Main.hs
-  #   source-dirs:         app/09-smoke-basin
-  #   ghc-options:
-  #   - -threaded
-  #   - -rtsopts
-  #   - -with-rtsopts=-N
-  #   dependencies:
-  #     - split
-  #     - containers
-  #     - relude
-  #
-  # 10-syntax-scoring:
-  #   main:                Main.hs
-  #   source-dirs:         app/10-syntax-scoring
-  #   ghc-options:
-  #   - -threaded
-  #   - -rtsopts
-  #   - -with-rtsopts=-N
-  #   dependencies:
-  #     - split
-  #     - containers
-  11-dumbo-octopus:
-    main:                Main.hs
-    source-dirs:         app/11-dumbo-octopus
+  aoc-2021:
+    main:                  Main.hs
+    source-dirs:           app
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-      - split
-      - containers
-      - relude
+      - advent-of-code-y2021

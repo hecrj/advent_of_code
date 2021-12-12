@@ -1,21 +1,32 @@
-module Main where
+module AdventOfCode.Y2021.Lanternfish
+    ( day
+    ) where
 
 import Data.Map.Strict (Map)
 import Data.Maybe
+import qualified AdventOfCode
 import qualified Data.List.Split as List
 import qualified Data.Map.Strict as Map
 
 
-main :: IO ()
-main = do
-    fish <- fmap (fmap parseLanternfish . List.splitOn ",") getContents
+day :: AdventOfCode.Day
+day =
+    AdventOfCode.day "Lanternfish" part1 part2
+    where
+        part1 =
+            solve 80
 
-    let
+        part2 =
+            solve 256
+
+        solve n =
+            countFish . (!! n) . oceanByDay . parse
+
+        parse =
+            fmap parseLanternfish . List.splitOn ","
+
         oceanByDay =
-            iterate simulate (newOcean fish)
-
-    putStrLn $ show $ countFish (oceanByDay !! 80)
-    putStrLn $ show $ countFish (oceanByDay !! 256)
+            iterate simulate . newOcean
 
 
 data Lanternfish

@@ -1,35 +1,40 @@
-module Main where
+module AdventOfCode.Y2021.GiantSquid
+    ( day
+    ) where
 
 import Data.List
 import Data.List.Split
+import Data.Maybe
+import qualified AdventOfCode
 
 
-main :: IO ()
-main = do
-    (inputNumbers : inputBoards) <- fmap (filter (not . null) . splitOn "\n\n") getContents
+day :: AdventOfCode.Day
+day =
+    AdventOfCode.day "Giant Squid" part1 part2
+    where
+        part1 =
+            run bingo
 
-    let
-        numbers =
-            map read (splitOn "," inputNumbers) :: [Int]
+        part2 =
+            run bingoLast
 
-        boards =
-            map parseBoard inputBoards
+        run f =
+            fromMaybe (error "no bingo!") . fmap score . uncurry f . parse
 
-    case bingo boards numbers of
-        Just bingo -> do
-            putStrLn $ show bingo
-            putStrLn $ show (score bingo)
+        parse input =
+            case filter (not . null) $ splitOn "\n\n" input of
+                (inputNumbers : inputBoards) ->
+                    let
+                        numbers =
+                            map read (splitOn "," inputNumbers) :: [Int]
 
-        Nothing ->
-            error "no bingo!"
+                        boards =
+                            map parseBoard inputBoards
+                    in
+                    ( boards, numbers )
 
-    case bingoLast boards numbers of
-        Just bingo -> do
-            putStrLn $ show bingo
-            putStrLn $ show (score bingo)
-
-        Nothing ->
-            error "no bingo!"
+                _ ->
+                    error "invalid input!"
 
 
 data Board

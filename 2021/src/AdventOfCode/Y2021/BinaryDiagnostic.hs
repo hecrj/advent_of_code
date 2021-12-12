@@ -1,19 +1,35 @@
-module Main where
+module AdventOfCode.Y2021.BinaryDiagnostic where
 
 import Data.Bits
 import Data.List
+import qualified AdventOfCode
 
 
-main :: IO ()
-main = do
-    report <- fmap (fmap parseBits . lines) getContents
+day :: AdventOfCode.Day
+day =
+    AdventOfCode.day "Binary Diagnostic" part1 part2
 
+
+part1 :: String -> Int
+part1 input =
     let
+        report =
+            parse input
+
         gammaRate =
             computeGammaRate report
 
         epsilonRate =
             map inverse gammaRate
+    in
+    toDecimal gammaRate * toDecimal epsilonRate
+
+
+part2 :: String -> Int
+part2 input =
+    let
+        report =
+            parse input
 
         oxygenGeneratorRating =
             computeByBitCriteria oxygenGeneratorCriteria report
@@ -26,9 +42,13 @@ main = do
 
         co2ScrubberCriteria =
             inverse . oxygenGeneratorCriteria
+    in
+    toDecimal oxygenGeneratorRating * toDecimal co2ScrubberRating
 
-    putStrLn $ show (toDecimal gammaRate * toDecimal epsilonRate)
-    putStrLn $ show (toDecimal oxygenGeneratorRating * toDecimal co2ScrubberRating)
+
+parse :: String -> [[Bit]]
+parse =
+    fmap parseBits . lines
 
 
 data Bit

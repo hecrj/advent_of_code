@@ -1,16 +1,26 @@
-module Main where
+module AdventOfCode.Y2021.SonarSweep
+    ( day
+    ) where
 
 import Data.List as List
+import qualified AdventOfCode
 
 
-main :: IO ()
-main = do
-    measurements <- fmap (fmap read . lines) getContents :: IO [Integer]
-    putStrLn (show (countIncreases measurements))
-    putStrLn (show (countWindowIncreases measurements))
+day :: AdventOfCode.Day
+day =
+    AdventOfCode.day "Sonar Sweep" part1 part2
+    where
+        part1 =
+            countIncreases . parse
+
+        part2 =
+            countWindowIncreases . parse
+
+        parse =
+            fmap read . lines
 
 
-countIncreases :: [Integer] -> Integer
+countIncreases :: [Int] -> Int
 countIncreases [] =
     0
 countIncreases [ _ ] =
@@ -22,7 +32,7 @@ countIncreases (a : b : rest)
         countIncreases (b : rest)
 
 
-countWindowIncreases :: [Integer] -> Integer
+countWindowIncreases :: [Int] -> Int
 countWindowIncreases list =
     countIncreases $
         concat $
