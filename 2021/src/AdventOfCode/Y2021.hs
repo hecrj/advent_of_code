@@ -9,6 +9,7 @@ import qualified AdventOfCode.Y2021.DumboOctopus as DumboOctopus
 import qualified AdventOfCode.Y2021.GiantSquid as GiantSquid
 import qualified AdventOfCode.Y2021.HydrothermalVenture as HydrothermalVenture
 import qualified AdventOfCode.Y2021.Lanternfish as Lanternfish
+import qualified AdventOfCode.Y2021.PassagePathing as PassagePathing
 import qualified AdventOfCode.Y2021.SevenSegmentSearch as SevenSegmentSearch
 import qualified AdventOfCode.Y2021.SmokeBasin as SmokeBasin
 import qualified AdventOfCode.Y2021.SonarSweep as SonarSweep
@@ -30,4 +31,5 @@ year =
         , SmokeBasin.day
         , SyntaxScoring.day
         , DumboOctopus.day
+        , PassagePathing.day
         ]

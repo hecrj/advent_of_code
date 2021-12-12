@@ -5,11 +5,13 @@ module AdventOfCode
     , day
     , year
     , run
+    , debug
     ) where
 
 import Data.Char
 import Data.Maybe
 import qualified Data.List as List
+import qualified Debug.Trace as Debug
 import qualified System.Directory as Directory
 import qualified System.IO as IO
 
@@ -147,3 +149,8 @@ padLeft n c s =
 padRight :: Int -> Char -> String -> String
 padRight n c s =
     s ++ replicate (n - length s) c
+
+
+debug :: Show a => a -> a
+debug a =
+    Debug.traceShow a a

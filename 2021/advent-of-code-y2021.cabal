@@ -33,6 +33,7 @@ library
       AdventOfCode.Y2021.GiantSquid
       AdventOfCode.Y2021.HydrothermalVenture
       AdventOfCode.Y2021.Lanternfish
+      AdventOfCode.Y2021.PassagePathing
       AdventOfCode.Y2021.SevenSegmentSearch
       AdventOfCode.Y2021.SmokeBasin
       AdventOfCode.Y2021.SonarSweep
