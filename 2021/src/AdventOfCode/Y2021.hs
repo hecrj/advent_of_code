@@ -15,6 +15,7 @@ import qualified AdventOfCode.Y2021.SmokeBasin as SmokeBasin
 import qualified AdventOfCode.Y2021.SonarSweep as SonarSweep
 import qualified AdventOfCode.Y2021.SyntaxScoring as SyntaxScoring
 import qualified AdventOfCode.Y2021.TheTreacheryOfWhales as TheTreacheryOfWhales
+import qualified AdventOfCode.Y2021.TransparentOrigami as TransparentOrigami
 
 
 year :: AdventOfCode.Year
@@ -32,4 +33,5 @@ year =
         , SyntaxScoring.day
         , DumboOctopus.day
         , PassagePathing.day
+        , TransparentOrigami.day
         ]
