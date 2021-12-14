@@ -13,24 +13,27 @@ day :: AdventOfCode.Day
 day =
     AdventOfCode.day "Extended Polymerization" part1 part2
     where
-        part1 input =
+        part1 =
+            run 10
+
+        part2 =
+            run 40
+
+        run steps input =
             let
                 polymers =
                     uncurry (flip simulate) $ parse input
 
-                countAt10 =
-                    count (polymers !! 10)
+                countAtSteps =
+                    count (polymers !! steps)
 
                 mostCommon =
-                    maximum $ fmap snd countAt10
+                    maximum $ fmap snd countAtSteps
 
                 leastCommon =
-                    minimum $ fmap snd countAt10
+                    minimum $ fmap snd countAtSteps
             in
             mostCommon - leastCommon
-
-        part2 =
-            const 0
 
 
 parse :: String -> ( Polymer, RuleSet )
@@ -44,7 +47,23 @@ parse input =
 
 
 data Polymer
-    = Polymer [Element]
+    = Polymer
+        { _elements :: Map Element Int
+        , _pairs :: PairMap
+        }
+
+
+type PairMap = Map ( Element, Element ) Int
+
+
+lookup' :: Ord a => a -> Map a Int -> Int
+lookup' key =
+    Maybe.fromMaybe 0 . Map.lookup key
+
+
+increment :: Ord a => Int -> a -> Map a Int -> Map a Int
+increment n key map =
+    Map.insert key (lookup' key map + n) map
 
 
 data Element
@@ -53,8 +72,25 @@ data Element
 
 
 parsePolymer :: String -> Polymer
-parsePolymer =
-    Polymer . fmap Element
+parsePolymer input =
+    let
+        ( elements, pairs ) =
+            parseMap Map.empty Map.empty input
+    in
+    Polymer elements pairs
+    where
+        parseMap elements pairs (a : b : rest) =
+            let
+                ( newElements, newPairs ) =
+                    parseMap elements pairs (b : rest)
+            in
+            ( increment 1 (Element a) newElements
+            , increment 1 ( Element a, Element b ) newPairs
+            )
+        parseMap elements pairs [ a ] =
+            ( increment 1 (Element a) elements, pairs )
+        parseMap elements pairs [] =
+            ( elements, pairs )
 
 
 simulate :: RuleSet -> Polymer -> [Polymer]
@@ -63,11 +99,18 @@ simulate ruleSet =
 
 
 grow :: RuleSet -> Polymer -> Polymer
-grow (RuleSet rules) (Polymer (a : b : rest)) =
-    let
-        Polymer end =
-            grow (RuleSet rules) (Polymer (b : rest))
+grow rules (Polymer elements pairs) =
+    uncurry Polymer $
+        foldr (grow' rules) ( elements, Map.empty ) (Map.toList pairs)
 
+
+grow' ::
+    RuleSet
+    -> ( ( Element, Element ), Int )
+    -> ( Map Element Int, PairMap )
+    -> ( Map Element Int, PairMap )
+grow' (RuleSet rules) ( ( a, b ), count ) ( elements, pairs ) =
+    let
         insertion =
             Maybe.fromMaybe (error "pair not found!")
                 (Map.lookup
@@ -75,21 +118,14 @@ grow (RuleSet rules) (Polymer (a : b : rest)) =
                     rules
                 )
     in
-    Polymer (a : insertion : end)
-grow _ p =
-    p
+    ( increment count insertion elements
+    , increment count ( a, insertion ) $ increment count ( insertion, b ) pairs
+    )
 
 
 count :: Polymer -> [( Element, Int )]
-count (Polymer elements) =
-    Map.toList $ foldr insertOrIncrement Map.empty elements
-    where
-        insertOrIncrement element map =
-            let
-                currentCount =
-                    Maybe.fromMaybe 0 $ Map.lookup element map
-            in
-            Map.insert element (currentCount + 1) map
+count (Polymer elements _) =
+    Map.toList elements
 
 
 data RuleSet
