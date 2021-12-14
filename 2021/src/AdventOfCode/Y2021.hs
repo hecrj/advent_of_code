@@ -6,6 +6,7 @@ import qualified AdventOfCode
 import qualified AdventOfCode.Y2021.BinaryDiagnostic as BinaryDiagnostic
 import qualified AdventOfCode.Y2021.Dive as Dive
 import qualified AdventOfCode.Y2021.DumboOctopus as DumboOctopus
+import qualified AdventOfCode.Y2021.ExtendedPolymerization as ExtendedPolymerization
 import qualified AdventOfCode.Y2021.GiantSquid as GiantSquid
 import qualified AdventOfCode.Y2021.HydrothermalVenture as HydrothermalVenture
 import qualified AdventOfCode.Y2021.Lanternfish as Lanternfish
@@ -34,4 +35,5 @@ year =
         , DumboOctopus.day
         , PassagePathing.day
         , TransparentOrigami.day
+        , ExtendedPolymerization.day
         ]
