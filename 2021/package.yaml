@@ -25,6 +25,7 @@ dependencies:
 - split
 - containers
 - relude
+- heap
 
 ghc-options:
   - -W
