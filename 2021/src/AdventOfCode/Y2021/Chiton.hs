@@ -1,15 +1,13 @@
+{-# LANGUAGE DeriveGeneric #-}
 module AdventOfCode.Y2021.Chiton
     ( day
     ) where
 
-import Data.Function
-import Data.Map.Strict (Map)
-import Data.PQueue.Prio.Min (MinPQueue)
+import Data.Hashable
+import GHC.Generics (Generic)
 import qualified AdventOfCode
-import qualified Data.List as List
-import qualified Data.Map.Strict as Map
+import qualified AdventOfCode.Path as Path
 import qualified Data.Maybe as Maybe
-import qualified Data.PQueue.Prio.Min as MinPQueue
 
 
 day :: AdventOfCode.Day
@@ -52,74 +50,47 @@ extend grid =
 
 data Position
     = Position { _i :: Int, _j :: Int }
-    deriving (Eq, Ord, Show)
+    deriving (Eq, Ord, Show, Generic)
+
+
+instance Hashable Position where
 
 
 lowestRisk :: [[Int]] -> Int
 lowestRisk grid =
     let
-        unvisited =
-            MinPQueue.singleton 0 (Position 0 0)
+        start =
+            Position 0 0
 
-        risks =
-            Map.fromList [ ( Position 0 0, 0 ) ]
+        end =
+            Position (length grid - 1) (length grid - 1)
     in
-    risk (Position (length grid - 1) (length grid - 1)) $
-        shortestRisks unvisited risks grid
+    fst . Maybe.fromJust $
+        Path.search start end
+            (neighbors grid)
+            (manhattan end)
 
 
-shortestRisks :: MinPQueue Int Position -> Map Position Int -> [[Int]] -> Map Position Int
-shortestRisks unvisited risks grid
-    | MinPQueue.null unvisited =
-        risks
-    | otherwise =
-        let
-            ( currentRisk, current ) =
-                MinPQueue.findMin unvisited
-
-            newUnvisited =
-                MinPQueue.deleteMin unvisited
-
-            unvisitedNeighbors =
-                neighbors current
-
-            ( finalUnvisited, newRisks ) =
-                foldr (reduceRisk currentRisk grid) ( newUnvisited, risks ) unvisitedNeighbors
-        in
-        shortestRisks finalUnvisited newRisks grid
-    where
-        reduceRisk currentRisk grid p@(Position i j) ( unvisited, risks )
-            | i >= 0 && i < length grid && j >= 0 && j < length grid =
-                let
-                    newRisk =
-                        currentRisk + (grid !! i !! j)
-                in
-                if newRisk < risk p risks then
-                    let
-                        newUnvisited =
-                            if List.elem p (MinPQueue.elems unvisited) then
-                                newUnvisited
-
-                            else
-                                MinPQueue.insert newRisk p unvisited
-                    in
-                    ( newUnvisited, Map.insert p newRisk risks )
-
-                else
-                    ( unvisited, risks )
-            | otherwise =
-                ( unvisited, risks )
+manhattan :: Position -> Path.Heuristic Position
+manhattan (Position jEnd iEnd) (Position i j) =
+    abs (iEnd - i) + abs (jEnd - j)
 
 
-risk :: Position -> Map Position Int -> Int
-risk position =
-    Maybe.fromMaybe maxBound . Map.lookup position
-
-
-neighbors :: Position -> [Position]
-neighbors (Position i j) =
+neighbors :: [[Int]] -> Path.Movement Position
+neighbors grid (Position i j) =
     let
         moves =
             [ ( -1, 0 ), ( 1, 0 ), ( 0, -1 ), ( 0, 1 ) ]
     in
-    [ Position (i + ni) (j + nj) | ( ni, nj ) <- moves ]
+    fmap withCost $
+        filter inBounds
+            [
+                Position (i + ni) (j + nj)
+                | ( ni, nj ) <- moves
+            ]
+    where
+        inBounds (Position i j) =
+            i >= 0 && j >= 0 && i < length grid && j < length grid
+
+        withCost p@(Position i j) =
+            ( p, grid !! i !! j )

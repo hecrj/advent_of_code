@@ -25,7 +25,7 @@ dependencies:
 - split
 - containers
 - relude
-- pqueue
+- hashable
 
 ghc-options:
   - -W
