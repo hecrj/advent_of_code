@@ -11,6 +11,7 @@ import qualified AdventOfCode.Y2021.ExtendedPolymerization as ExtendedPolymeriza
 import qualified AdventOfCode.Y2021.GiantSquid as GiantSquid
 import qualified AdventOfCode.Y2021.HydrothermalVenture as HydrothermalVenture
 import qualified AdventOfCode.Y2021.Lanternfish as Lanternfish
+import qualified AdventOfCode.Y2021.PacketDecoder as PacketDecoder
 import qualified AdventOfCode.Y2021.PassagePathing as PassagePathing
 import qualified AdventOfCode.Y2021.SevenSegmentSearch as SevenSegmentSearch
 import qualified AdventOfCode.Y2021.SmokeBasin as SmokeBasin
@@ -38,4 +39,5 @@ year =
         , TransparentOrigami.day
         , ExtendedPolymerization.day
         , Chiton.day
+        , PacketDecoder.day
         ]

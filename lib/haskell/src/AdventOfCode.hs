@@ -13,6 +13,7 @@ import Data.Maybe
 import qualified Data.List as List
 import qualified Debug.Trace as Debug
 import qualified System.Directory as Directory
+import qualified System.Environment as Environment
 import qualified System.IO as IO
 
 
@@ -39,6 +40,8 @@ year =
 
 run :: Year -> IO ()
 run (Year number days) = do
+    args <- fmap (fmap read) Environment.getArgs
+
     let
         title =
             "Advent of Code " ++ show number
@@ -46,17 +49,24 @@ run (Year number days) = do
         separator =
             take (length title) (repeat '=')
 
+        selection =
+            if List.null args then
+                zip [1..] days
+
+            else
+                filter (flip List.elem args . fst) $ zip [1..] days
+
     putStrLn separator
     putStrLn title
     putStrLn separator
-    runDays days
+    runDays selection
 
 
-runDays :: [Day] -> IO ()
+runDays :: [( Int, Day )] -> IO ()
 runDays days = do
     let
         maxTitle =
-            maximum $ fmap (length . title) days
+            maximum $ fmap (length . title . snd) days
 
         columns =
             [ "Day"
@@ -73,20 +83,21 @@ runDays days = do
 
     putStrLn header
     putStrLn separator
-    outputs <- sequence $ map (uncurry runDay) $ zip [1..] days
-    sequence_ $ map (uncurry (putOutput maxTitle)) $ zip [1..] outputs
+    outputs <- sequence $ map (uncurry runDay) days
+    sequence_ $ map (putOutput maxTitle) outputs
 
 
 data Output
     = Output
-        { _title :: String
+        { _day :: Int
+        , _title :: String
         , _example :: Maybe ( Int, Int )
         , _input :: ( Int, Int )
         }
 
 
-putOutput :: Int -> Int -> Output -> IO ()
-putOutput titlePadding number (Output title _example input) =
+putOutput :: Int -> Output -> IO ()
+putOutput titlePadding (Output number title _example input) =
     let
         day =
             padLeft 2 '0' (show number)
@@ -110,7 +121,7 @@ runDay :: Int -> Day -> IO Output
 runDay number (Day title solution1 solution2) = do
     example <- run' "example"
     input <- run' "input"
-    return $ Output title example $ fromMaybe (error ("input not found for: " ++ title)) input
+    return $ Output number title example $ fromMaybe (error ("input not found for: " ++ title)) input
     where
         run' :: String -> IO (Maybe ( Int, Int ))
         run' directory = do
