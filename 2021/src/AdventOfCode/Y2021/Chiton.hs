@@ -4,12 +4,12 @@ module AdventOfCode.Y2021.Chiton
 
 import Data.Function
 import Data.Map.Strict (Map)
-import Data.Set (Set)
+import Data.PQueue.Prio.Min (MinPQueue)
 import qualified AdventOfCode
 import qualified Data.List as List
 import qualified Data.Map.Strict as Map
 import qualified Data.Maybe as Maybe
-import qualified Data.Set as Set
+import qualified Data.PQueue.Prio.Min as MinPQueue
 
 
 day :: AdventOfCode.Day
@@ -20,12 +20,34 @@ day =
             lowestRisk . parse
 
         part2 =
-            const 0
+            lowestRisk . extend . parse
 
 
 parse :: String -> [[Int]]
 parse =
     fmap (fmap (read . pure)) . lines
+
+
+extend :: [[Int]] -> [[Int]]
+extend grid =
+    concat $ fmap (extendGrid grid) [0..4]
+    where
+        extendGrid grid i =
+            fmap (extendRow i) grid
+
+        extendRow i row =
+            concat $ fmap (generateRow i row) [0..4]
+
+        generateRow i row j =
+            fmap
+                (\risk ->
+                    if risk + i + j > 9 then
+                        (risk + i + j) `mod` 9
+
+                    else
+                        risk + i + j
+                )
+                row
 
 
 data Position
@@ -37,7 +59,7 @@ lowestRisk :: [[Int]] -> Int
 lowestRisk grid =
     let
         unvisited =
-            Set.fromList $ map fst $ concat $ withPositions grid
+            MinPQueue.singleton 0 (Position 0 0)
 
         risks =
             Map.fromList [ ( Position 0 0, 0 ) ]
@@ -46,50 +68,47 @@ lowestRisk grid =
         shortestRisks unvisited risks grid
 
 
-shortestRisks :: Set Position -> Map Position Int -> [[Int]] -> Map Position Int
+shortestRisks :: MinPQueue Int Position -> Map Position Int -> [[Int]] -> Map Position Int
 shortestRisks unvisited risks grid
-    | Set.null unvisited =
+    | MinPQueue.null unvisited =
         risks
     | otherwise =
         let
-            current =
-                List.minimumBy (compare `on` (flip risk) risks) $
-                    Set.toList unvisited
+            ( currentRisk, current ) =
+                MinPQueue.findMin unvisited
 
             newUnvisited =
-                Set.delete current unvisited
-
-            currentRisk =
-                risk current risks
+                MinPQueue.deleteMin unvisited
 
             unvisitedNeighbors =
-                filter (flip Set.member unvisited) $
-                    neighbors current
+                neighbors current
 
-            newRisks =
-                foldr (reduceRisk currentRisk grid) risks unvisitedNeighbors
+            ( finalUnvisited, newRisks ) =
+                foldr (reduceRisk currentRisk grid) ( newUnvisited, risks ) unvisitedNeighbors
         in
-        shortestRisks newUnvisited newRisks grid
+        shortestRisks finalUnvisited newRisks grid
     where
-        reduceRisk currentRisk grid p@(Position i j) risks
+        reduceRisk currentRisk grid p@(Position i j) ( unvisited, risks )
             | i >= 0 && i < length grid && j >= 0 && j < length grid =
                 let
                     newRisk =
                         currentRisk + (grid !! i !! j)
                 in
                 if newRisk < risk p risks then
-                    Map.insert p newRisk risks
+                    let
+                        newUnvisited =
+                            if List.elem p (MinPQueue.elems unvisited) then
+                                newUnvisited
+
+                            else
+                                MinPQueue.insert newRisk p unvisited
+                    in
+                    ( newUnvisited, Map.insert p newRisk risks )
 
                 else
-                    risks
+                    ( unvisited, risks )
             | otherwise =
-                risks
-
-
-withPositions :: [[Int]] -> [[( Position, Int )]]
-withPositions =
-    fmap (\( i, row ) -> fmap (\( j, risk ) -> ( Position i j, risk )) row)
-        . zip [0..] . fmap (zip [0..])
+                ( unvisited, risks )
 
 
 risk :: Position -> Map Position Int -> Int

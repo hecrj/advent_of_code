@@ -25,11 +25,10 @@ dependencies:
 - split
 - containers
 - relude
-- heap
+- pqueue
 
 ghc-options:
   - -W
-  - -Werror
 
 library:
   source-dirs: src
