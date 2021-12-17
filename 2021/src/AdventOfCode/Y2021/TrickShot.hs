@@ -14,7 +14,7 @@ day =
             maximum . fmap maxHeight . shotsOnTarget . parseTarget
 
         part2 =
-            const 0
+            length . shotsOnTarget . parseTarget
 
 
 data Target
@@ -47,11 +47,15 @@ newtype Velocity
 
 shotsOnTarget :: Target -> [Velocity]
 shotsOnTarget target@(Target ( _, xEnd ) ( yStart, _ )) =
-    filter (hitsTarget target)
+    let
+        boundary =
+            max xEnd (abs yStart)
+    in
+    filter (hitsTarget target) $
         [
             Velocity ( x, y )
-            | x <- [0..max xEnd (abs yStart)]
-            , y <- [0..max xEnd (abs yStart)]
+            | x <- [0..boundary]
+            , y <- enumFromThenTo (-boundary) (-boundary + 1) boundary
         ]
 
 
@@ -62,7 +66,7 @@ hitsTarget target =
         simulate target@(Target ( xStart, xEnd ) ( yStart, yEnd )) ( x, y ) (Velocity ( xVelocity, yVelocity ))
             | x >= xStart && x <= xEnd && y >= yStart && y <= yEnd =
                 True
-            | x >= xEnd || y <= yEnd =
+            | x > xEnd || y < yStart =
                 False
             | otherwise =
                 simulate target
