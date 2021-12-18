@@ -15,7 +15,7 @@ day =
             magnitude . foldl1 add . fmap parseNumber . lines
 
         part2 =
-            const 0
+            maximum . fmap (magnitude . uncurry add) . pairs . fmap parseNumber . lines
 
 
 data Number
@@ -228,3 +228,12 @@ componentsToString (c : rest) =
 
         Close ->
             ']' : componentsToString rest
+
+
+pairs :: [a] -> [( a, a )]
+pairs xs =
+    let
+        pairs' =
+            [ ( x, y ) | (x : rest) <- List.tails xs, y <- rest ]
+    in
+    concat $ fmap (\( a, b ) -> [ ( a, b ), ( b, a ) ]) pairs'
