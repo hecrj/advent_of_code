@@ -3,6 +3,7 @@ module AdventOfCode.Y2020
     ) where
 
 import qualified AdventOfCode
+import qualified AdventOfCode.Y2020.PassportProcessing as PassportProcessing
 import qualified AdventOfCode.Y2020.PasswordPhilosophy as PasswordPhilosophy
 import qualified AdventOfCode.Y2020.ReportRepair as ReportRepair
 import qualified AdventOfCode.Y2020.TobogganTrajectory as TobogganTrajectory
@@ -14,4 +15,5 @@ year =
         [ ReportRepair.day
         , PasswordPhilosophy.day
         , TobogganTrajectory.day
+        , PassportProcessing.day
         ]
