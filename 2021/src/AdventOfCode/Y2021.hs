@@ -15,6 +15,7 @@ import qualified AdventOfCode.Y2021.PacketDecoder as PacketDecoder
 import qualified AdventOfCode.Y2021.PassagePathing as PassagePathing
 import qualified AdventOfCode.Y2021.SevenSegmentSearch as SevenSegmentSearch
 import qualified AdventOfCode.Y2021.SmokeBasin as SmokeBasin
+import qualified AdventOfCode.Y2021.Snailfish as Snailfish
 import qualified AdventOfCode.Y2021.SonarSweep as SonarSweep
 import qualified AdventOfCode.Y2021.SyntaxScoring as SyntaxScoring
 import qualified AdventOfCode.Y2021.TheTreacheryOfWhales as TheTreacheryOfWhales
@@ -42,4 +43,5 @@ year =
         , Chiton.day
         , PacketDecoder.day
         , TrickShot.day
+        , Snailfish.day
         ]
