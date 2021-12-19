@@ -20,7 +20,12 @@ day =
             Set.size . beacons . findScanners . parse
 
         part2 =
-            const 0
+            maximum
+                . fmap (uncurry manhattanDistance)
+                    . AdventOfCode.pairs
+                        . fmap _position
+                            . findScanners
+                                . parse
 
 
 parse :: String -> [Report]
@@ -158,6 +163,15 @@ rotations (Position x y z) =
 distance :: Position -> Position -> Vector
 distance (Position x1 y1 z1) (Position x2 y2 z2) =
     Vector (x2 - x1) (y2 - y1) (z2 - z1)
+
+
+manhattanDistance :: Position -> Position -> Int
+manhattanDistance p1 p2 =
+    let
+        Vector x y z =
+            distance p1 p2
+    in
+    abs x + abs y + abs z
 
 
 data Vector

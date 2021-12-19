@@ -6,6 +6,7 @@ module AdventOfCode
     , year
     , run
     , debug
+    , pairs
     ) where
 
 import Data.Char
@@ -165,3 +166,12 @@ padRight n c s =
 debug :: Show a => a -> a
 debug a =
     Debug.traceShow a a
+
+
+pairs :: [a] -> [( a, a )]
+pairs xs =
+    let
+        pairs' =
+            [ ( x, y ) | (x : rest) <- List.tails xs, y <- rest ]
+    in
+    concat $ fmap (\( a, b ) -> [ ( a, b ), ( b, a ) ]) pairs'
