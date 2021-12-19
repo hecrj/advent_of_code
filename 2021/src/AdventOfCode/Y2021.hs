@@ -3,6 +3,7 @@ module AdventOfCode.Y2021
     ) where
 
 import qualified AdventOfCode
+import qualified AdventOfCode.Y2021.BeaconScanner as BeaconScanner
 import qualified AdventOfCode.Y2021.BinaryDiagnostic as BinaryDiagnostic
 import qualified AdventOfCode.Y2021.Chiton as Chiton
 import qualified AdventOfCode.Y2021.Dive as Dive
@@ -44,4 +45,5 @@ year =
         , PacketDecoder.day
         , TrickShot.day
         , Snailfish.day
+        , BeaconScanner.day
         ]
