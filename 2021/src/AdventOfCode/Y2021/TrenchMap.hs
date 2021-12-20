@@ -15,14 +15,18 @@ day =
     AdventOfCode.day "Trench Map" part1 part2
     where
         part1 =
-            Maybe.fromMaybe (error "infinite lit pixels!")
-                . count Light
-                    . flip (!!) 2
-                        . uncurry steps
-                            . parse
+            countLight . enhanceN 2 . parse
 
         part2 =
-            const 0
+            countLight . enhanceN 50 . parse
+
+        enhanceN n =
+            flip (!!) n
+                . uncurry steps
+
+        countLight =
+            Maybe.fromMaybe (error "infinite lit pixels!")
+                . count Light
 
 
 parse :: String -> ( Algorithm, Image )
