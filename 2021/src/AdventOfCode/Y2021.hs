@@ -21,6 +21,7 @@ import qualified AdventOfCode.Y2021.SonarSweep as SonarSweep
 import qualified AdventOfCode.Y2021.SyntaxScoring as SyntaxScoring
 import qualified AdventOfCode.Y2021.TheTreacheryOfWhales as TheTreacheryOfWhales
 import qualified AdventOfCode.Y2021.TransparentOrigami as TransparentOrigami
+import qualified AdventOfCode.Y2021.TrenchMap as TrenchMap
 import qualified AdventOfCode.Y2021.TrickShot as TrickShot
 
 
@@ -46,4 +47,5 @@ year =
         , TrickShot.day
         , Snailfish.day
         , BeaconScanner.day
+        , TrenchMap.day
         ]

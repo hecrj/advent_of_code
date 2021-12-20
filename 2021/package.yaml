@@ -26,6 +26,7 @@ dependencies:
 - containers
 - relude
 - hashable
+- vector
 
 ghc-options:
   - -W
