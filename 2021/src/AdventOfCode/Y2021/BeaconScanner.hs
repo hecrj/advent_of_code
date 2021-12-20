@@ -90,24 +90,17 @@ determine (Scanner _ beacons) (Report readings) =
     in
     do
         ( distance, readings' ) <-
-            case Maybe.catMaybes $ fmap (uncurry overlap) (distances beacons rotated) of
-                [] ->
-                    Nothing
-
-                h : _ ->
-                    Just h
+            AdventOfCode.head $
+                Maybe.catMaybes $ fmap (uncurry overlap) (distances beacons rotated)
 
         Just $ Scanner (sub distance (Position 0 0 0)) (fmap (sub distance) readings')
 
 
 overlap :: [Vector] -> [Position] -> Maybe ( Vector, [Position] )
 overlap distances rotations =
-    case filter (flip (>=) 12 . snd) $ AdventOfCode.countOccurrences distances of
-        [] ->
-            Nothing
-
-        ( h, _ ) : _ ->
-            Just ( h, rotations )
+    fmap (flip (,) rotations . fst) $
+        AdventOfCode.head $
+            filter (flip (>=) 12 . snd) $ AdventOfCode.countOccurrences distances
 
 
 data Position

@@ -8,6 +8,7 @@ module AdventOfCode
     , debug
     , pairs
     , countOccurrences
+    , AdventOfCode.head
     ) where
 
 import Data.Char
@@ -189,3 +190,10 @@ countOccurrences =
                 element
                 (Maybe.fromMaybe 0 (Map.lookup element map) + 1)
                 map
+
+
+head :: [a] -> Maybe a
+head [] =
+    Nothing
+head (h : _) =
+    Just h
