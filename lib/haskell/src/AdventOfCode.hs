@@ -7,11 +7,14 @@ module AdventOfCode
     , run
     , debug
     , pairs
+    , countOccurrences
     ) where
 
 import Data.Char
 import Data.Maybe
 import qualified Data.List as List
+import qualified Data.Map.Strict as Map
+import qualified Data.Maybe as Maybe
 import qualified Debug.Trace as Debug
 import qualified System.Directory as Directory
 import qualified System.Environment as Environment
@@ -175,3 +178,14 @@ pairs xs =
             [ ( x, y ) | (x : rest) <- List.tails xs, y <- rest ]
     in
     concat $ fmap (\( a, b ) -> [ ( a, b ), ( b, a ) ]) pairs'
+
+
+countOccurrences :: Ord a => [a] -> [( a, Int )]
+countOccurrences =
+    Map.toList . foldr increment Map.empty
+    where
+        increment element map =
+            Map.insert
+                element
+                (Maybe.fromMaybe 0 (Map.lookup element map) + 1)
+                map

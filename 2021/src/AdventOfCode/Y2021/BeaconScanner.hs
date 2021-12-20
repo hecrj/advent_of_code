@@ -90,20 +90,24 @@ determine (Scanner _ beacons) (Report readings) =
     in
     do
         ( distance, readings' ) <-
-            List.find
-                (uncurry (overlap beacons))
-                (distances beacons rotated)
+            case Maybe.catMaybes $ fmap (uncurry overlap) (distances beacons rotated) of
+                [] ->
+                    Nothing
+
+                h : _ ->
+                    Just h
 
         Just $ Scanner (sub distance (Position 0 0 0)) (fmap (sub distance) readings')
 
 
-overlap :: [Position] -> Vector -> [Position] -> Bool
-overlap beacons candidate readings =
-    let
-        intersection =
-            List.intersect readings $ fmap (add candidate) beacons
-    in
-    length intersection >= 12
+overlap :: [Vector] -> [Position] -> Maybe ( Vector, [Position] )
+overlap distances rotations =
+    case filter (flip (>=) 12 . snd) $ AdventOfCode.countOccurrences distances of
+        [] ->
+            Nothing
+
+        ( h, _ ) : _ ->
+            Just ( h, rotations )
 
 
 data Position
@@ -121,14 +125,17 @@ parsePosition =
             error "invalid position!"
 
 
-distances :: [Position] -> [[Position]] -> [( Vector, [Position] )]
+distances :: [Position] -> [[Position]] -> [( [Vector], [Position] )]
 distances list rotations =
-    concat $
-        [
-            fmap (\candidate -> ( distance a candidate, b )) b
-            | a <- list
-            , b <- rotations
-        ]
+    [
+        ( fmap (uncurry distance) (pairs list rotation)
+        , rotation
+        )
+        | rotation <- rotations
+    ]
+    where
+        pairs list rotation =
+            [ ( a, b ) | a <- list, b <- rotation ]
 
 
 rotations :: Position -> [Position]
@@ -176,7 +183,7 @@ manhattanDistance p1 p2 =
 
 data Vector
     = Vector { _x :: Int, _y :: Int, _z :: Int }
-    deriving Show
+    deriving (Eq, Ord, Show)
 
 
 add :: Vector -> Position -> Position
