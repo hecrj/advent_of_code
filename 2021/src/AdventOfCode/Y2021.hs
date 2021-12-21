@@ -6,6 +6,7 @@ import qualified AdventOfCode
 import qualified AdventOfCode.Y2021.BeaconScanner as BeaconScanner
 import qualified AdventOfCode.Y2021.BinaryDiagnostic as BinaryDiagnostic
 import qualified AdventOfCode.Y2021.Chiton as Chiton
+import qualified AdventOfCode.Y2021.DiracDice as DiracDice
 import qualified AdventOfCode.Y2021.Dive as Dive
 import qualified AdventOfCode.Y2021.DumboOctopus as DumboOctopus
 import qualified AdventOfCode.Y2021.ExtendedPolymerization as ExtendedPolymerization
@@ -48,4 +49,5 @@ year =
         , Snailfish.day
         , BeaconScanner.day
         , TrenchMap.day
+        , DiracDice.day
         ]
