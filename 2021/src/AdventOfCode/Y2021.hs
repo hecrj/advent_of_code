@@ -15,6 +15,7 @@ import qualified AdventOfCode.Y2021.HydrothermalVenture as HydrothermalVenture
 import qualified AdventOfCode.Y2021.Lanternfish as Lanternfish
 import qualified AdventOfCode.Y2021.PacketDecoder as PacketDecoder
 import qualified AdventOfCode.Y2021.PassagePathing as PassagePathing
+import qualified AdventOfCode.Y2021.ReactorReboot as ReactorReboot
 import qualified AdventOfCode.Y2021.SevenSegmentSearch as SevenSegmentSearch
 import qualified AdventOfCode.Y2021.SmokeBasin as SmokeBasin
 import qualified AdventOfCode.Y2021.Snailfish as Snailfish
@@ -50,4 +51,5 @@ year =
         , BeaconScanner.day
         , TrenchMap.day
         , DiracDice.day
+        , ReactorReboot.day
         ]
