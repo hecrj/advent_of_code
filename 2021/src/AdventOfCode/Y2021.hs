@@ -3,6 +3,7 @@ module AdventOfCode.Y2021
     ) where
 
 import qualified AdventOfCode
+import qualified AdventOfCode.Y2021.Amphipod as Amphipod
 import qualified AdventOfCode.Y2021.BeaconScanner as BeaconScanner
 import qualified AdventOfCode.Y2021.BinaryDiagnostic as BinaryDiagnostic
 import qualified AdventOfCode.Y2021.Chiton as Chiton
@@ -52,4 +53,5 @@ year =
         , TrenchMap.day
         , DiracDice.day
         , ReactorReboot.day
+        , Amphipod.day
         ]
