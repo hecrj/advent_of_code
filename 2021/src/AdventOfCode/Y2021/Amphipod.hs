@@ -17,140 +17,84 @@ day =
     AdventOfCode.day "Amphipod" part1 part2
     where
         part1 =
-            fst . Maybe.fromMaybe (error "no way to organize found!") . organize . parse
+            solve
 
-        part2 =
-            const 0
+        part2 input =
+            let
+                ( start, end ) =
+                    List.splitAt 3 $ lines input
+
+                unfolded =
+                    concat $
+                        List.intersperse "\n" $
+                            concat
+                                [ start
+                                , [ "  #D#C#B#A#" ]
+                                , [ "  #D#B#A#C#" ]
+                                , end
+                                ]
+            in
+            solve unfolded
+
+        solve =
+            fst . Maybe.fromMaybe (error "no way to organize found!") . organize . parse
 
 
 data Building
     = Building
-        { _amphipods :: [Amphipod]
+        { _size :: Int
+        , _amphipods :: [Amphipod]
         }
     deriving (Eq, Ord, Generic)
 
 
-instance Show Building where
-    show (Building amphipods) =
-        concat $
-            List.intersperse "\n"
-                [ []
-                , replicate 13 '#'
-                , concat [ "#", hallway, "#" ]
-                , concat
-                    [ "###"
-                    , pure $ room Amber Top
-                    , "#"
-                    , pure $ room Bronze Top
-                    , "#"
-                    , pure $ room Copper Top
-                    , "#"
-                    , pure $ room Desert Top
-                    , "###"
-                    ]
-                , concat
-                    [ "  #"
-                    , pure $ room Amber Bottom
-                    , "#"
-                    , pure $ room Bronze Bottom
-                    , "#"
-                    , pure $ room Copper Bottom
-                    , "#"
-                    , pure $ room Desert Bottom
-                    , "#"
-                    ]
-                , concat [ "  ", replicate 9 '#' ]
-                , []
-                ]
-        where
-            hallway =
-                fmap halwayCell [0..10]
-
-            halwayCell cell =
-                case List.find (moving cell) amphipods of
-                    Just (Amphipod kind _) ->
-                        toChar kind
-
-                    Nothing ->
-                        '.'
-
-            room kind position =
-                case List.find (insideRoom kind position) amphipods of
-                    Just (Amphipod kind _) ->
-                        toChar kind
-
-                    Nothing ->
-                        '.'
-
-            insideRoom room position pod =
-                case pod of
-                    Amphipod _ (Idle r p) ->
-                        r == room && p == position
-
-                    Amphipod r (Arrived p) ->
-                        r == room && p == position
-
-                    _ ->
-                        False
-
-
 parse :: String -> Building
 parse input =
-    Building $
-        List.sort $
-            concat
-                [ parseRoom 0 Amber
-                , parseRoom 1 Bronze
-                , parseRoom 2 Copper
-                , parseRoom 3 Desert
-                ]
+    Building size $ List.sort $ concat rooms
     where
+        rooms =
+            [ parseRoom 0 Amber
+            , parseRoom 1 Bronze
+            , parseRoom 2 Copper
+            , parseRoom 3 Desert
+            ]
+
+        size =
+            length $ List.transpose rooms
+
         room n =
-            concat $ drop (2 * n) $ drop 3 $ List.transpose $ drop 2 $ lines input
+            concat $ take 1 $ drop (2 * n) $ drop 3 $ List.transpose $ drop 2 $ lines input
 
         parseRoom n roomKind =
-            case room n of
-                (top : bottom : _) ->
-                    [ flip Amphipod (Idle roomKind Top) (parseKind top)
-                    , let
-                        kind =
-                            parseKind bottom
-                    in
-                    if kind == roomKind then
-                        Amphipod kind (Arrived Bottom)
-
-                    else
-                        flip Amphipod (Idle roomKind Bottom) (parseKind bottom)
-                    ]
-
-                _ ->
-                    error "invalid room!"
+            fmap (uncurry (parseAmphipod roomKind)) $
+                zip [0..] $
+                    reverse $
+                        drop 1 $
+                            reverse (room n)
 
 
-complete :: Building
-complete =
-    Building $
+complete :: Int -> Building
+complete size =
+    Building size $
         List.sort $
             concat $
                 fmap
                     (\kind ->
-                        [ Amphipod kind (Arrived Top)
-                        , Amphipod kind (Arrived Bottom)
-                        ]
+                        fmap (Amphipod kind . Arrived) [0..size - 1]
                     )
                     [ Amber, Bronze, Copper, Desert ]
 
 
 organize :: Building -> Maybe ( Int, [Building] )
-organize building =
-    Path.search building complete movement (const 0)
+organize building@(Building size _) =
+    Path.search building (complete size) movement (const 0)
     where
-        movement (Building amphipods) =
+        movement (Building size amphipods) =
             concat $
                 fmap
                     (\pod -> do
-                        ( Building pods, cost ) <- moves (Building (List.delete pod amphipods)) pod
-                        [ ( Building (List.sort pods), cost ) ]
+                        ( Building _ pods, cost ) <- moves (Building size (List.delete pod amphipods)) pod
+                        [ ( Building size (List.sort pods), cost ) ]
                     )
                     amphipods
 
@@ -158,7 +102,7 @@ organize building =
 moves :: Building -> Amphipod -> [( Building, Int )]
 moves _ (Amphipod _ (Arrived _)) =
     []
-moves (Building others) (Amphipod kind (Idle room position))
+moves (Building size others) (Amphipod kind (Idle room position))
     | isRoomExitBlocked =
         arrivedMoves
     | otherwise =
@@ -169,7 +113,7 @@ moves (Building others) (Amphipod kind (Idle room position))
     where
         arrivedMoves =
             if kind == room then
-                [ ( Building (Amphipod kind (Arrived position) : others), 0 ) ]
+                [ ( Building size (Amphipod kind (Arrived position) : others), 0 ) ]
 
             else
                 []
@@ -179,25 +123,24 @@ moves (Building others) (Amphipod kind (Idle room position))
                 Nothing
             | otherwise =
                 Just
-                    ( Building (Amphipod kind (Moving cell) : others)
+                    ( Building size (Amphipod kind (Moving cell) : others)
                     , costToHallway room kind cell position
                     )
 
         isRoomExitBlocked =
-            case position of
-                Top ->
-                    False
-
-                Bottom ->
-                    any (idling room) others || any (reached room) others
+            Maybe.isJust $
+                List.find (flip (<) position) $
+                    Maybe.catMaybes $
+                        fmap maybePosition $
+                            List.filter (isInside room) others
 
         isPathToHallwayBlocked cell =
             any (blocking (cells room cell)) others
-moves (Building others) (Amphipod kind (Moving cell))
+moves (Building size others) (Amphipod kind (Moving cell))
     | isHallwayBlocked || isRoomBlocked =
         []
     | otherwise =
-        [ ( Building (Amphipod kind (Arrived destinationPosition) : others)
+        [ ( Building size (Amphipod kind (Arrived destinationPosition) : others)
           , costToRoom kind cell destinationPosition
           )
         ]
@@ -209,11 +152,7 @@ moves (Building others) (Amphipod kind (Moving cell))
             any (idling kind) others
 
         destinationPosition =
-            if any (reached kind) others then
-                Top
-
-            else
-                Bottom
+            size - length (List.filter (reached kind) others) - 1
 
 
 data Amphipod
@@ -222,6 +161,11 @@ data Amphipod
         , state :: State
         }
     deriving (Eq, Ord, Generic, Show)
+
+
+parseAmphipod :: Kind -> Int -> Char -> Amphipod
+parseAmphipod room position kind =
+    Amphipod (parseKind kind) (Idle room position)
 
 
 idling :: Kind -> Amphipod -> Bool
@@ -264,6 +208,20 @@ reached _ _ =
     False
 
 
+isInside :: Kind -> Amphipod -> Bool
+isInside room pod =
+    reached room pod || idling room pod
+
+
+maybePosition :: Amphipod -> Maybe Int
+maybePosition (Amphipod _ (Idle _ position)) =
+    Just position
+maybePosition (Amphipod _ (Arrived position)) =
+    Just position
+maybePosition _ =
+    Nothing
+
+
 data Kind
     = Amber
     | Bronze
@@ -297,15 +255,9 @@ toChar Desert =
 
 
 data State
-    = Idle Kind Position
+    = Idle Kind Int
     | Moving Int
-    | Arrived Position
-    deriving (Eq, Ord, Generic, Show)
-
-
-data Position
-    = Top
-    | Bottom
+    | Arrived Int
     deriving (Eq, Ord, Generic, Show)
 
 
@@ -336,21 +288,16 @@ hallwayLocation Desert =
     8
 
 
-costToRoom :: Kind -> Int -> Position -> Int
+costToRoom :: Kind -> Int -> Int -> Int
 costToRoom kind cell position =
     costToHallway kind kind cell position
 
 
-costToHallway :: Kind -> Kind -> Int -> Position -> Int
+costToHallway :: Kind -> Kind -> Int -> Int -> Int
 costToHallway room kind cell position =
     let
         roomSteps =
-            case position of
-                Top ->
-                    1
-
-                Bottom ->
-                    2
+            position + 1
 
         hallwaySteps =
             abs (cell - hallwayLocation room)
@@ -359,6 +306,62 @@ costToHallway room kind cell position =
             roomSteps + hallwaySteps
     in
     steps * cost kind
+
+
+instance Show Building where
+    show (Building size amphipods) =
+        concat $
+            List.intersperse "\n"
+                [ []
+                , replicate 13 '#'
+                , concat [ "#", hallway, "#" ]
+                , concat $ fmap rooms [0..size - 1]
+                , concat [ "  ", replicate 9 '#' ]
+                , []
+                ]
+        where
+            hallway =
+                fmap halwayCell [0..10]
+
+            halwayCell cell =
+                case List.find (moving cell) amphipods of
+                    Just (Amphipod kind _) ->
+                        toChar kind
+
+                    Nothing ->
+                        '.'
+
+            rooms position =
+                concat
+                    [ "###"
+                    , pure $ room Amber position
+                    , "#"
+                    , pure $ room Bronze position
+                    , "#"
+                    , pure $ room Copper position
+                    , "#"
+                    , pure $ room Desert position
+                    , "###"
+                    ]
+
+            room kind position =
+                case List.find (insideRoom kind position) amphipods of
+                    Just (Amphipod kind _) ->
+                        toChar kind
+
+                    Nothing ->
+                        '.'
+
+            insideRoom room position pod =
+                case pod of
+                    Amphipod _ (Idle r p) ->
+                        r == room && p == position
+
+                    Amphipod r (Arrived p) ->
+                        r == room && p == position
+
+                    _ ->
+                        False
 
 
 instance Hashable Building where
@@ -371,6 +374,3 @@ instance Hashable Kind where
 
 
 instance Hashable State where
-
-
-instance Hashable Position where
