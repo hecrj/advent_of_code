@@ -76,8 +76,8 @@ runDays days = do
         columns =
             [ "Day"
             , padRight maxTitle ' ' "Name"
-            , padRight 10 ' ' "Part 1"
-            , padRight 15 ' ' "Part 2"
+            , padRight 16 ' ' "Part 1"
+            , padRight 16 ' ' "Part 2"
             ]
 
         header =
@@ -115,8 +115,8 @@ putOutput titlePadding (Output number title _example input) =
                 List.intersperse " | "
                     [ ' ' : day
                     , paddedTitle
-                    , padLeft 10 ' ' $ show (fst input)
-                    , padLeft 15 ' ' $ show (snd input)
+                    , padLeft 16 ' ' $ show (fst input)
+                    , padLeft 16 ' ' $ show (snd input)
                     ]
     in
     putStrLn row

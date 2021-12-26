@@ -4,6 +4,7 @@ module AdventOfCode.Y2021
 
 import qualified AdventOfCode
 import qualified AdventOfCode.Y2021.Amphipod as Amphipod
+import qualified AdventOfCode.Y2021.ArithmeticLogicUnit as ArithmeticLogicUnit
 import qualified AdventOfCode.Y2021.BeaconScanner as BeaconScanner
 import qualified AdventOfCode.Y2021.BinaryDiagnostic as BinaryDiagnostic
 import qualified AdventOfCode.Y2021.Chiton as Chiton
@@ -54,4 +55,5 @@ year =
         , DiracDice.day
         , ReactorReboot.day
         , Amphipod.day
+        , ArithmeticLogicUnit.day
         ]
