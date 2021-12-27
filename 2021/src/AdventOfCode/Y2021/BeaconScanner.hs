@@ -179,11 +179,6 @@ data Vector
     deriving (Eq, Ord, Show)
 
 
-add :: Vector -> Position -> Position
-add (Vector vx vy vz) (Position x y z) =
-    Position (x + vx) (y + vy) (z + vz)
-
-
 sub :: Vector -> Position -> Position
 sub (Vector vx vy vz) (Position x y z) =
     Position (x - vx) (y - vy) (z - vz)
