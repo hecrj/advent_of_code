@@ -71,7 +71,7 @@ runDays :: [( Int, Day )] -> IO ()
 runDays days = do
     let
         maxTitle =
-            maximum $ fmap (length . title . snd) days
+            15
 
         columns =
             [ "Day"
@@ -102,13 +102,23 @@ data Output
 
 
 putOutput :: Int -> Output -> IO ()
-putOutput titlePadding (Output number title _example input) =
+putOutput maxTitle (Output number title _example input) =
     let
         day =
             padLeft 2 '0' (show number)
 
+        ellipsis =
+            if length title > maxTitle then
+                reverse $
+                    (++) "..." $
+                        dropWhile ((==) ' ') $
+                            drop (length title - maxTitle + 3) $ reverse title
+
+            else
+                title
+
         paddedTitle =
-            padRight titlePadding ' ' title
+            padRight maxTitle ' ' ellipsis
 
         row =
             concat $
