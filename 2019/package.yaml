@@ -20,6 +20,7 @@ dependencies:
 - advent-of-code
 - split
 - containers
+- vector
 
 ghc-options:
   - -W
