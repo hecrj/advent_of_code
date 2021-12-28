@@ -1,6 +1,6 @@
-name:                advent-of-code-y2021
+name:                advent-of-code-y2019
 version:             0.1.0.0
-github:              "githubuser/advent-of-code-y2021"
+github:              "githubuser/advent-of-code-y2019"
 license:             BSD3
 author:              "Author name here"
 maintainer:          "example@example.com"
@@ -13,31 +13,29 @@ copyright:           "2021 Author name here"
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/githubuser/advent-of-code-y2021#readme>
+description:         Please see the README on GitHub at <https://github.com/githubuser/advent-of-code-y2020#readme>
 
 dependencies:
 - base >= 4.7 && < 5
 - advent-of-code
 - split
 - containers
-- relude
-- hashable
-- vector
 
 ghc-options:
   - -W
+  - -Werror
 
 library:
   source-dirs: src
 
 executables:
-  aoc-2021:
-    main:                  Main.hs
-    source-dirs:           app
+  Main:
+    main:                Main.hs
+    source-dirs:         app
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-      - advent-of-code
-      - advent-of-code-y2021
+    - advent-of-code
+    - advent-of-code-y2019
