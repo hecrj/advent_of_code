@@ -3,6 +3,7 @@ module AdventOfCode
     , Solution
     , Year
     , day
+    , todo
     , year
     , run
     , debug
@@ -24,6 +25,7 @@ import qualified System.IO as IO
 
 data Day
     = Day { title :: String, _solution1 :: Solution, _solution2 :: Solution }
+    | Todo
 
 
 type Solution = String -> Int
@@ -32,6 +34,11 @@ type Solution = String -> Int
 day :: String -> Solution -> Solution -> Day
 day =
     Day
+
+
+todo :: Day
+todo =
+    Todo
 
 
 data Year
@@ -133,6 +140,8 @@ putOutput maxTitle (Output number title _example input) =
 
 
 runDay :: Int -> Day -> IO Output
+runDay number Todo =
+    return $ Output number "-" Nothing ( 0, 0 )
 runDay number (Day title solution1 solution2) = do
     example <- run' "example"
     input <- run' "input"
