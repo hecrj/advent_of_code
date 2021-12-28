@@ -3,6 +3,7 @@ module AdventOfCode.Y2019.TheTyrannyOfTheRocketEquation
     ) where
 
 import qualified AdventOfCode
+import qualified Data.List as List
 
 
 day :: AdventOfCode.Day
@@ -13,7 +14,7 @@ day =
             sum . fmap fuel . parse
 
         part2 =
-            const 0
+            sum . fmap properFuel . parse
 
 
 parse :: String -> [Module]
@@ -33,3 +34,17 @@ parseModule =
 fuel :: Module -> Int
 fuel (Module mass) =
     mass `div` 3 - 2
+
+
+properFuel :: Module -> Int
+properFuel =
+    sum
+        . List.unfoldr
+            (\fuel_ ->
+                if fuel_ > 0 then
+                    Just ( fuel_, fuel (Module fuel_) )
+
+                else
+                    Nothing
+            )
+            . fuel
