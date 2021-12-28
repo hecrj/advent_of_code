@@ -14,10 +14,23 @@ day =
     AdventOfCode.day "1202 Program Alarm" part1 part2
     where
         part1 =
-            value 0 . run . replace 2 2 . replace 1 12 . parse
+            assist 12 2
 
-        part2 =
-            const 0
+        part2 input =
+            let
+                ( noun, verb ) =
+                    head $
+                        List.filter ((==) 19690720 . flip (uncurry assist) input)
+                            [
+                                ( noun, verb )
+                                | noun <- [0..99]
+                                , verb <- [0..99]
+                            ]
+            in
+            noun * 100 + verb
+
+        assist noun verb =
+            value 0 . run . replace 2 verb . replace 1 noun . load . parse
 
 
 newtype Program
@@ -30,41 +43,51 @@ parse =
     Program . Vector.fromList . fmap read . List.splitOn ","
 
 
-replace :: Int -> Int -> Program -> Program
-replace n value (Program program) =
-    Program (program // [ ( n, value ) ])
+data Memory
+    = Memory (Vector Int)
+    deriving Show
 
 
-value :: Int -> Program -> Int
-value n (Program program) =
-    program ! n
+load :: Program -> Memory
+load (Program program) =
+    Memory program
 
 
-operate :: (Int -> Int -> Int) -> Int -> Int -> Int -> Program -> Program
-operate f a b c (Program program) =
-    Program (program // [ ( c, f (program ! a) (program ! b) ) ])
+replace :: Int -> Int -> Memory -> Memory
+replace n value (Memory memory) =
+    Memory (memory // [ ( n, value ) ])
 
 
-run :: Program -> Program
+value :: Int -> Memory -> Int
+value n (Memory memory) =
+    memory ! n
+
+
+operate :: (Int -> Int -> Int) -> Int -> Int -> Int -> Memory -> Memory
+operate f a b c (Memory memory) =
+    Memory (memory // [ ( c, f (memory ! a) (memory ! b) ) ])
+
+
+run :: Memory -> Memory
 run =
-    _program . head . reverse . List.unfoldr run' . Just . flip Computer 0
+    _memory . head . reverse . List.unfoldr run' . Just . flip Computer 0
     where
         run' Nothing =
             Nothing
-        run' (Just computer@(Computer program counter)) =
+        run' (Just computer@(Computer memory counter)) =
             let
                 ( instruction, counter' ) =
-                    peek counter program
+                    peek counter memory
 
-                program' =
-                    evaluate instruction program
+                memory' =
+                    evaluate instruction memory
             in
-            Just ( computer, flip Computer counter' <$> program' )
+            Just ( computer, flip Computer counter' <$> memory' )
 
 
 data Computer
     = Computer
-        { _program :: Program
+        { _memory :: Memory
         , _counter :: Int
         }
     deriving Show
@@ -76,9 +99,9 @@ data Instruction
     | Halt
 
 
-peek :: Int -> Program -> ( Instruction, Int )
-peek counter (Program program) =
-    case program ! counter of
+peek :: Int -> Memory -> ( Instruction, Int )
+peek counter (Memory memory) =
+    case memory ! counter of
         1 ->
             ternary Add
 
@@ -86,16 +109,16 @@ peek counter (Program program) =
             ternary Mul
 
         99 ->
-            ( Halt, counter )
+            ( Halt, counter + 1 )
 
         _ ->
             error ("unknow opcode: " ++ show opcode)
     where
         opcode =
-            program ! counter
+            memory ! counter
 
         ternary instruction =
-            case Vector.toList $ Vector.slice (counter + 1) 3 program of
+            case Vector.toList $ Vector.slice (counter + 1) 3 memory of
                 [ a, b, c ] ->
                     ( instruction a b c, counter + 4 )
 
@@ -103,7 +126,7 @@ peek counter (Program program) =
                     error ("invalid counter: " ++ show counter)
 
 
-evaluate :: Instruction -> Program -> Maybe Program
+evaluate :: Instruction -> Memory -> Maybe Memory
 evaluate (Add a b c) =
     Just . operate (+) a b c
 evaluate (Mul a b c) =
