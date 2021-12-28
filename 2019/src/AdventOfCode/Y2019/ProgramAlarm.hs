@@ -14,13 +14,16 @@ day =
     AdventOfCode.day "1202 Program Alarm" part1 part2
     where
         part1 =
-            assist 12 2
+            assist 12 2 . load . parse
 
         part2 input =
             let
+                program =
+                    load (parse input)
+
                 ( noun, verb ) =
                     head $
-                        List.filter ((==) 19690720 . flip (uncurry assist) input)
+                        List.filter ((==) 19690720 . flip (uncurry assist) program)
                             [
                                 ( noun, verb )
                                 | noun <- [0..99]
@@ -30,7 +33,7 @@ day =
             noun * 100 + verb
 
         assist noun verb =
-            value 0 . run . replace 2 verb . replace 1 noun . load . parse
+            value 0 . run . replace 2 verb . replace 1 noun
 
 
 newtype Program
