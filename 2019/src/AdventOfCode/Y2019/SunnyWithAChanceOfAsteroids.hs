@@ -11,11 +11,14 @@ day =
     AdventOfCode.day "Sunny with a Chance of Asteroids" part1 part2
     where
         part1 =
-            head
-                . snd
-                    . Intcode.run (Intcode.input [ 1 ])
-                        . Intcode.load
-                            . Intcode.parse
+            run 1
 
         part2 =
-            const 0
+            run 5
+
+        run n =
+            head
+                . snd
+                    . Intcode.run (Intcode.input [ n ])
+                        . Intcode.load
+                            . Intcode.parse

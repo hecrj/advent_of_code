@@ -13,7 +13,7 @@ module AdventOfCode.Intcode
     ) where
 
 import Data.Vector (Vector, (//), (!))
-import Prelude hiding (print)
+import Prelude hiding (print, compare)
 import qualified Data.List as List
 import qualified Data.List.Split as List
 import qualified Data.Vector as Vector
@@ -105,6 +105,11 @@ print value (Computer memory input (Output output) counter) =
     Computer memory input (Output (value : output)) counter
 
 
+jump :: Address -> Computer -> Computer
+jump address (Computer memory input output _) =
+    Computer memory input output address
+
+
 data Input
     = Input [Int]
     deriving Show
@@ -125,6 +130,10 @@ data Instruction
     | Mul Parameter Parameter Address
     | Input_ Address
     | Output_ Parameter
+    | JumpIfTrue Parameter Parameter
+    | JumpIfFalse Parameter Parameter
+    | LessThan Parameter Parameter Address
+    | Equals Parameter Parameter Address
     | Halt
     deriving Show
 
@@ -176,6 +185,18 @@ peek (Address counter) (Memory memory) =
         4 ->
             unary Output_ id
 
+        5 ->
+            binary JumpIfTrue id id
+
+        6 ->
+            binary JumpIfFalse id id
+
+        7 ->
+            ternary LessThan id id position
+
+        8 ->
+            ternary Equals id id position
+
         99 ->
             Halt
 
@@ -209,6 +230,14 @@ peek (Address counter) (Memory memory) =
             case parameters 1 of
                 [ a ] ->
                     instruction (parse a)
+
+                _ ->
+                    error ("invalid counter: " ++ show counter)
+
+        binary instruction parseA parseB =
+            case parameters 2 of
+                [ a, b ] ->
+                    instruction (parseA a) (parseB b)
 
                 _ ->
                     error ("invalid counter: " ++ show counter)
@@ -247,6 +276,42 @@ evaluate (Output_ parameter) =
                 in
                 print value computer
             )
+evaluate (JumpIfTrue a b) =
+    Just
+        . (\computer ->
+            let
+                value =
+                    resolve a (_memory computer)
+
+                address =
+                    resolve b (_memory computer)
+            in
+            if value /= 0 then
+                jump (Address address) computer
+
+            else
+                advance 3 computer
+        )
+evaluate (JumpIfFalse a b) =
+    Just
+        . (\computer ->
+            let
+                value =
+                    resolve a (_memory computer)
+
+                address =
+                    resolve b (_memory computer)
+            in
+            if value == 0 then
+                jump (Address address) computer
+
+            else
+                advance 3 computer
+        )
+evaluate (LessThan a b target) =
+    Just . advance 4 . write (operate (compare (<)) a b target)
+evaluate (Equals a b target) =
+    Just . advance 4 . write (operate (compare (==)) a b target)
 evaluate Halt =
     const Nothing
 
@@ -254,3 +319,8 @@ evaluate Halt =
 operate :: (Int -> Int -> Int) -> Parameter -> Parameter -> Address -> Memory -> Memory
 operate f a b c memory =
     replace c (f (resolve a memory) (resolve b memory)) memory
+
+
+compare :: (Int -> Int -> Bool) -> Int -> Int -> Int
+compare f a b =
+    if f a b then 1 else 0
