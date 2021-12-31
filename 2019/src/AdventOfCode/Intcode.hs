@@ -55,7 +55,7 @@ run input memory =
         Computer memory' _ (Output output) _ =
             head $ reverse $ List.unfoldr run' $ Just $ initialize memory input
     in
-    ( memory', output )
+    ( memory', reverse output )
     where
         run' Nothing =
             Nothing

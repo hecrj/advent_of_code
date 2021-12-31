@@ -15,19 +15,22 @@ day =
             maximum . runAll (List.permutations [0..4]) . Intcode.parse
 
         part2 =
-            const 0
+            maximum . runAll (List.permutations [5..9]) . Intcode.parse
 
         runAll permutations program =
             fmap (run program) permutations
 
 
 run :: Intcode.Program -> [Int] -> Int
-run program =
-    foldr runAmplifier 0
+run program configuration =
+    last chain
     where
+        chain =
+            foldr runAmplifier (0 : chain) configuration
+
         runAmplifier phase input =
             let
                 ( _memory, output ) =
-                    Intcode.run (Intcode.input [ phase, input ]) (Intcode.load program)
+                    Intcode.run (Intcode.input (phase : input)) (Intcode.load program)
             in
-            head output
+            output
