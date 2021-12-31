@@ -5,6 +5,7 @@ module AdventOfCode.Y2019
 import qualified AdventOfCode
 import qualified AdventOfCode.Y2019.AmplificationCircuit as AmplificationCircuit
 import qualified AdventOfCode.Y2019.ProgramAlarm as ProgramAlarm
+import qualified AdventOfCode.Y2019.SensorBoost as SensorBoost
 import qualified AdventOfCode.Y2019.SunnyWithAChanceOfAsteroids as SunnyWithAChanceOfAsteroids
 import qualified AdventOfCode.Y2019.TheTyrannyOfTheRocketEquation as TheTyrannyOfTheRocketEquation
 
@@ -19,4 +20,6 @@ year =
         , SunnyWithAChanceOfAsteroids.day
         , AdventOfCode.todo
         , AmplificationCircuit.day
+        , AdventOfCode.todo
+        , SensorBoost.day
         ]

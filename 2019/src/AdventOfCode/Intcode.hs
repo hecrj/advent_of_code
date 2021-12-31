@@ -12,10 +12,11 @@ module AdventOfCode.Intcode
     , run
     ) where
 
-import Data.Vector (Vector, (//), (!))
+import Data.Vector (Vector, (//), (!), (!?))
 import Prelude hiding (print, compare)
 import qualified Data.List as List
 import qualified Data.List.Split as List
+import qualified Data.Maybe as Maybe
 import qualified Data.Vector as Vector
 
 
@@ -40,26 +41,34 @@ load (Program program) =
 
 
 replace :: Address -> Int -> Memory -> Memory
-replace (Address n) value (Memory memory) =
-    Memory (memory // [ ( n, value ) ])
+replace (Address n) v (Memory memory) =
+    let
+        memory' =
+            if Vector.length memory <= n then
+                Vector.generate (n + 1024) (\i -> value (Address i) (Memory memory))
+
+            else
+                memory
+    in
+    Memory (memory' // [ ( n, v ) ])
 
 
 value :: Address -> Memory -> Int
 value (Address n) (Memory memory) =
-    memory ! n
+    Maybe.fromMaybe 0 (memory !? n)
 
 
 run :: Input -> Memory -> ( Memory, [Int] )
 run input memory =
     let
-        Computer memory' _ (Output output) _ =
+        Computer memory' _ (Output output) _ _ =
             head $ reverse $ List.unfoldr run' $ Just $ initialize memory input
     in
     ( memory', reverse output )
     where
         run' Nothing =
             Nothing
-        run' (Just computer@(Computer memory _ _ counter)) =
+        run' (Just computer@(Computer memory _ _ counter _)) =
             let
                 instruction =
                     peek counter memory
@@ -76,38 +85,44 @@ data Computer
         , _input :: Input
         , _output :: Output
         , _counter :: Address
+        , _base :: Address
         }
     deriving Show
 
 
 initialize :: Memory -> Input -> Computer
 initialize memory input =
-    Computer memory input (Output []) (Address 0)
+    Computer memory input (Output []) (Address 0) (Address 0)
 
 
-write :: (Memory -> Memory) -> Computer -> Computer
-write f (Computer memory input output counter) =
-    Computer (f memory) input output counter
+write :: (Address -> Memory -> Memory) -> Computer -> Computer
+write f (Computer memory input output counter base) =
+    Computer (f base memory) input output counter base
 
 
 advance :: Int -> Computer -> Computer
-advance n (Computer memory input output (Address counter)) =
-    Computer memory input output (Address (counter + n))
+advance n (Computer memory input output (Address counter) base) =
+    Computer memory input output (Address (counter + n)) base
 
 
 read_ :: Computer -> ( Int, Computer )
-read_ (Computer memory (Input input) output counter) =
-    ( head input, Computer memory (Input (tail input)) output counter )
+read_ (Computer memory (Input input) output counter base) =
+    ( head input, Computer memory (Input (tail input)) output counter base )
 
 
 print :: Int -> Computer -> Computer
-print value (Computer memory input (Output output) counter) =
-    Computer memory input (Output (value : output)) counter
+print value (Computer memory input (Output output) counter base) =
+    Computer memory input (Output (value : output)) counter base
 
 
 jump :: Address -> Computer -> Computer
-jump address (Computer memory input output _) =
-    Computer memory input output address
+jump address (Computer memory input output _ base) =
+    Computer memory input output address base
+
+
+adjust :: Int -> Computer -> Computer
+adjust offset (Computer memory input output counter (Address base)) =
+    Computer memory input output counter (Address (base + offset))
 
 
 data Input
@@ -126,37 +141,53 @@ data Output
 
 
 data Instruction
-    = Add Parameter Parameter Address
-    | Mul Parameter Parameter Address
-    | Input_ Address
+    = Add Parameter Parameter Position
+    | Mul Parameter Parameter Position
+    | Input_ Position
     | Output_ Parameter
     | JumpIfTrue Parameter Parameter
     | JumpIfFalse Parameter Parameter
-    | LessThan Parameter Parameter Address
-    | Equals Parameter Parameter Address
+    | LessThan Parameter Parameter Position
+    | Equals Parameter Parameter Position
+    | AdjustBase Parameter
     | Halt
     deriving Show
 
 
 data Parameter
-    = Position Address
+    = Position Position
     | Immediate Int
     deriving Show
 
 
+data Position
+    = Absolute Address
+    | Relative Address
+    deriving Show
+
+
+toAbsolute :: Address -> Position -> Address
+toAbsolute _ (Absolute address) =
+    address
+toAbsolute (Address base) (Relative (Address address)) =
+    Address (base + address)
+
+
 parseParameter :: Int -> Int -> Parameter
 parseParameter 0 =
-    Position . Address
+    Position . Absolute . Address
 parseParameter 1 =
     Immediate
+parseParameter 2 =
+    Position . Relative . Address
 parseParameter n =
     error ("invalid parameter mode: " ++ show n)
 
 
-resolve :: Parameter -> Memory -> Int
-resolve (Position address) =
-    value address
-resolve (Immediate value) =
+resolve :: Parameter -> Address -> Memory -> Int
+resolve (Position position) base =
+    value (toAbsolute base position)
+resolve (Immediate value) _ =
     const value
 
 
@@ -196,6 +227,9 @@ peek (Address counter) (Memory memory) =
 
         8 ->
             ternary Equals id id position
+
+        9 ->
+            unary AdjustBase id
 
         99 ->
             Halt
@@ -264,7 +298,7 @@ evaluate (Input_ target) =
                     ( input, computer' ) =
                         read_ computer
                 in
-                write (replace target input) computer'
+                write (const $ replace (toAbsolute (_base computer') target) input) computer'
             )
 evaluate (Output_ parameter) =
     Just
@@ -272,7 +306,7 @@ evaluate (Output_ parameter) =
             . (\computer ->
                 let
                     value =
-                        resolve parameter (_memory computer)
+                        resolve parameter (_base computer) (_memory computer)
                 in
                 print value computer
             )
@@ -281,10 +315,10 @@ evaluate (JumpIfTrue a b) =
         . (\computer ->
             let
                 value =
-                    resolve a (_memory computer)
+                    resolve a (_base computer) (_memory computer)
 
                 address =
-                    resolve b (_memory computer)
+                    resolve b (_base computer) (_memory computer)
             in
             if value /= 0 then
                 jump (Address address) computer
@@ -297,10 +331,10 @@ evaluate (JumpIfFalse a b) =
         . (\computer ->
             let
                 value =
-                    resolve a (_memory computer)
+                    resolve a (_base computer) (_memory computer)
 
                 address =
-                    resolve b (_memory computer)
+                    resolve b (_base computer) (_memory computer)
             in
             if value == 0 then
                 jump (Address address) computer
@@ -312,13 +346,23 @@ evaluate (LessThan a b target) =
     Just . advance 4 . write (operate (compare (<)) a b target)
 evaluate (Equals a b target) =
     Just . advance 4 . write (operate (compare (==)) a b target)
+evaluate (AdjustBase offset) =
+    Just
+        . advance 2
+            . (\computer ->
+                let
+                    value =
+                        resolve offset (_base computer) (_memory computer)
+                in
+                adjust value computer
+            )
 evaluate Halt =
     const Nothing
 
 
-operate :: (Int -> Int -> Int) -> Parameter -> Parameter -> Address -> Memory -> Memory
-operate f a b c memory =
-    replace c (f (resolve a memory) (resolve b memory)) memory
+operate :: (Int -> Int -> Int) -> Parameter -> Parameter -> Position -> Address -> Memory -> Memory
+operate f a b c base memory =
+    replace (toAbsolute base c) (f (resolve a base memory) (resolve b base memory)) memory
 
 
 compare :: (Int -> Int -> Bool) -> Int -> Int -> Int
