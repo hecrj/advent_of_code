@@ -1,10 +1,10 @@
-app "hello"
+app "01-calorie-counting"
     packages { pf: "https://github.com/roc-lang/basic-cli/releases/download/0.1.1/zAoiC9xtQPHywYk350_b7ust04BmWLW00sjb9ZPtSQk.tar.br" }
     imports [pf.Stdout, pf.Stderr, pf.Task.{attempt, await}, pf.File, pf.Path]
     provides [main] to pf
 
 Calories : U32
-Elf : { inventory : List Calories }
+Elf : List Calories
 
 main =
     input <- attempt readInput
@@ -19,7 +19,6 @@ main =
                       |> List.map Str.toU32
                       |> List.map (\num -> Result.withDefault num 0)
                 )
-                |> List.map (\inventory -> { inventory })
 
           _ <- elves
             |> elfWithMostCalories
@@ -38,14 +37,14 @@ main =
 elfWithMostCalories : List Elf -> Calories
 elfWithMostCalories = \elves ->
     elves
-        |> List.map (\elf -> List.sum elf.inventory)
+        |> List.map List.sum
         |> List.max
         |> Result.withDefault 0
 
 top3Elves : List Elf -> List Calories
 top3Elves = \elves ->
     elves
-        |> List.map (\elf -> List.sum elf.inventory)
+        |> List.map List.sum
         |> List.sortDesc
         |> List.sublist { start: 0, len: 3 }
 
