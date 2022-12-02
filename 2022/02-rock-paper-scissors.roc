@@ -1,39 +1,61 @@
 app "02-rock-paper-scissors"
     packages { pf: "https://github.com/roc-lang/basic-cli/releases/download/0.1.1/zAoiC9xtQPHywYk350_b7ust04BmWLW00sjb9ZPtSQk.tar.br" }
-    imports [pf.Stdout, pf.Stderr, pf.Task.{Task, attempt}, pf.File, pf.Path]
+    imports [pf.Stdout, pf.Stderr, pf.Task.{Task, attempt, await}, pf.File, pf.Path]
     provides [main] to pf
 
 
 main =
-    result <- attempt parse
-    when result is
-      Ok rounds ->
-        rounds
-            |> List.map score
-            |> List.sum
-            |> Num.toStr
-            |> Stdout.line
-
-      Err error -> 
-          Stderr.line (
-              when error is
-                  InvalidRound -> "invalid round"
-                  InvalidShape -> "invalid shape"
-                  _ -> "something went wrong"
-          )
-
-
-parse : Task (List Round) _
-parse =
     input <- attempt (File.readUtf8 (Path.fromStr "02-rock-paper-scissors.in"))
 
-    Result.try input (\lines ->
-        lines
-            |> Str.split "\n"
-            |> List.dropIf Str.isEmpty
-            |> List.mapTry parseRound
-    )
-    |> Task.fromResult
+    when input is
+      Ok lines ->
+        rounds = parse lines parseRound
+        actualRounds = parse lines parseActualRound
+
+
+        _ <- await (when rounds is
+          Ok r ->
+            r
+              |> List.map score
+              |> List.sum
+              |> Num.toStr
+              |> Stdout.line
+
+          Err error ->
+              Stderr.line (
+                  when error is
+                      InvalidRound -> "invalid round"
+                      InvalidShape -> "invalid shape"
+                      _ -> "something went wrong"
+              ))
+
+        when actualRounds is
+          Ok r ->
+            r
+              |> List.map actualScore
+              |> List.sum
+              |> Num.toStr
+              |> Stdout.line
+
+          Err error ->
+              Stderr.line (
+                  when error is
+                      InvalidRound -> "invalid round"
+                      InvalidShape -> "invalid shape"
+                      _ -> "something went wrong"
+              )
+
+
+      Err _ ->
+          Stderr.line "could not read input"
+
+
+parse : Str, (Str -> Result a err) -> Result (List a) err
+parse = \lines, parser ->
+    lines
+        |> Str.split "\n"
+        |> List.dropIf Str.isEmpty
+        |> List.mapTry parser
 
 Round : { opponent : Shape, me: Shape }
 
@@ -52,10 +74,10 @@ parseRound = \line ->
 
 score : Round -> Num *
 score = \round ->
-    shapeScore round.me + outcomeScore (outcome round)
+    shapeScore round.me + outcomeScore (roundOutcome round)
 
-outcome : Round -> Outcome
-outcome = \{ opponent, me } ->
+roundOutcome : Round -> Outcome
+roundOutcome = \{ opponent, me } ->
     if opponent == me then
         Draw
     else if wins me opponent then
@@ -98,9 +120,50 @@ wins = \a, b ->
 
 Outcome : [Win, Draw, Loss]
 
+parseOutcome : Str -> Result Outcome _
+parseOutcome = \line ->
+    when line is
+        "X" -> Ok Loss
+        "Y" -> Ok Draw
+        "Z" -> Ok Win
+        _ -> Err InvalidOutcome
+
 outcomeScore : Outcome -> Num *
 outcomeScore = \o ->
     when o is
         Win -> 6
         Draw -> 3
         Loss -> 0
+
+
+ActualRound : { opponent : Shape, outcome: Outcome }
+
+parseActualRound : Str -> Result ActualRound _
+parseActualRound = \line ->
+    when Str.split line " " is
+      [a, b] ->
+            parseOpponentShape a
+              |> Result.try (\opponent ->
+                parseOutcome b
+                  |> Result.try (\outcome -> Ok { opponent, outcome })
+              )
+
+      _ ->
+          Err InvalidRound
+
+actualScore : ActualRound -> Num *
+actualScore = \round ->
+    outcomeScore round.outcome + shapeScore (findMyShape round)
+
+findMyShape : ActualRound -> Shape
+findMyShape = \round ->
+    when round.outcome is
+        Draw -> round.opponent
+        Win -> when round.opponent is
+            Rock -> Paper
+            Paper -> Scissors
+            Scissors -> Rock
+        Loss -> when round.opponent is
+            Rock -> Scissors
+            Paper -> Rock
+            Scissors -> Paper
