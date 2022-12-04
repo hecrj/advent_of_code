@@ -1,76 +1,78 @@
 app "02-rock-paper-scissors"
     packages { pf: "https://github.com/roc-lang/basic-cli/releases/download/0.1.1/zAoiC9xtQPHywYk350_b7ust04BmWLW00sjb9ZPtSQk.tar.br" }
-    imports [pf.Stdout, pf.Stderr, pf.Task.{Task, attempt, await}, pf.File, pf.Path]
+    imports [pf.Stdout, pf.Stderr, pf.Task.{ Task, attempt, await }, pf.File, pf.Path]
     provides [main] to pf
-
 
 main =
     input <- attempt (File.readUtf8 (Path.fromStr "02-rock-paper-scissors.in"))
 
     when input is
-      Ok lines ->
-        rounds = parse lines parseRound
-        actualRounds = parse lines parseActualRound
+        Ok lines ->
+            rounds = parse lines parseRound
+            actualRounds = parse lines parseActualRound
 
+            _ <- await
+                    (
+                        when rounds is
+                            Ok r ->
+                                r
+                                |> List.map score
+                                |> List.sum
+                                |> Num.toStr
+                                |> Stdout.line
 
-        _ <- await (when rounds is
-          Ok r ->
-            r
-              |> List.map score
-              |> List.sum
-              |> Num.toStr
-              |> Stdout.line
+                            Err error ->
+                                Stderr.line
+                                    (
+                                        when error is
+                                            InvalidRound -> "invalid round"
+                                            InvalidShape -> "invalid shape"
+                                            _ -> "something went wrong"
+                                    )
+                    )
 
-          Err error ->
-              Stderr.line (
-                  when error is
-                      InvalidRound -> "invalid round"
-                      InvalidShape -> "invalid shape"
-                      _ -> "something went wrong"
-              ))
+            when actualRounds is
+                Ok r ->
+                    r
+                    |> List.map actualScore
+                    |> List.sum
+                    |> Num.toStr
+                    |> Stdout.line
 
-        when actualRounds is
-          Ok r ->
-            r
-              |> List.map actualScore
-              |> List.sum
-              |> Num.toStr
-              |> Stdout.line
+                Err error ->
+                    Stderr.line
+                        (
+                            when error is
+                                InvalidRound -> "invalid round"
+                                InvalidShape -> "invalid shape"
+                                _ -> "something went wrong"
+                        )
 
-          Err error ->
-              Stderr.line (
-                  when error is
-                      InvalidRound -> "invalid round"
-                      InvalidShape -> "invalid shape"
-                      _ -> "something went wrong"
-              )
-
-
-      Err _ ->
-          Stderr.line "could not read input"
-
+        Err _ ->
+            Stderr.line "could not read input"
 
 parse : Str, (Str -> Result a err) -> Result (List a) err
 parse = \lines, parser ->
     lines
-        |> Str.split "\n"
-        |> List.dropIf Str.isEmpty
-        |> List.mapTry parser
+    |> Str.split "\n"
+    |> List.dropIf Str.isEmpty
+    |> List.mapTry parser
 
-Round : { opponent : Shape, me: Shape }
+Round : { opponent : Shape, me : Shape }
 
 parseRound : Str -> Result Round _
 parseRound = \line ->
     when Str.split line " " is
-      [a, b] ->
+        [a, b] ->
             parseOpponentShape a
-              |> Result.try (\opponent ->
-                parseMyShape b
-                  |> Result.try (\me -> Ok { opponent, me })
-              )
+            |> Result.try
+                (\opponent ->
+                    parseMyShape b
+                    |> Result.try (\me -> Ok { opponent, me })
+                )
 
-      _ ->
-          Err InvalidRound
+        _ ->
+            Err InvalidRound
 
 score : Round -> Num *
 score = \round ->
@@ -85,7 +87,7 @@ roundOutcome = \{ opponent, me } ->
     else
         Loss
 
-Shape : [ Rock, Paper, Scissors ]
+Shape : [Rock, Paper, Scissors]
 
 parseOpponentShape : Str -> Result Shape _
 parseOpponentShape = \char ->
@@ -135,21 +137,21 @@ outcomeScore = \o ->
         Draw -> 3
         Loss -> 0
 
-
-ActualRound : { opponent : Shape, outcome: Outcome }
+ActualRound : { opponent : Shape, outcome : Outcome }
 
 parseActualRound : Str -> Result ActualRound _
 parseActualRound = \line ->
     when Str.split line " " is
-      [a, b] ->
+        [a, b] ->
             parseOpponentShape a
-              |> Result.try (\opponent ->
-                parseOutcome b
-                  |> Result.try (\outcome -> Ok { opponent, outcome })
-              )
+            |> Result.try
+                (\opponent ->
+                    parseOutcome b
+                    |> Result.try (\outcome -> Ok { opponent, outcome })
+                )
 
-      _ ->
-          Err InvalidRound
+        _ ->
+            Err InvalidRound
 
 actualScore : ActualRound -> Num *
 actualScore = \round ->
@@ -159,11 +161,14 @@ findMyShape : ActualRound -> Shape
 findMyShape = \round ->
     when round.outcome is
         Draw -> round.opponent
-        Win -> when round.opponent is
-            Rock -> Paper
-            Paper -> Scissors
-            Scissors -> Rock
-        Loss -> when round.opponent is
-            Rock -> Scissors
-            Paper -> Rock
-            Scissors -> Paper
+        Win ->
+            when round.opponent is
+                Rock -> Paper
+                Paper -> Scissors
+                Scissors -> Rock
+
+        Loss ->
+            when round.opponent is
+                Rock -> Scissors
+                Paper -> Rock
+                Scissors -> Paper

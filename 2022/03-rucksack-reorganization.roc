@@ -3,23 +3,22 @@ app "02-rucksack-reorganization"
     imports [pf.Stdout, pf.Stderr, pf.Task, pf.File, pf.Path]
     provides [main] to pf
 
-
 main =
     input <- Task.attempt (File.readUtf8 (Path.fromStr "03-rucksack-reorganization.in"))
 
     when input is
-      Ok lines ->
-          rucksacks = parse lines
+        Ok lines ->
+            rucksacks = parse lines
 
-          _ <- rucksacks
-              |> List.map repeatedItem
-              |> List.map itemScore
-              |> List.sum
-              |> Num.toStr
-              |> Stdout.line
-              |> Task.await
+            _ <- rucksacks
+                |> List.map repeatedItem
+                |> List.map itemScore
+                |> List.sum
+                |> Num.toStr
+                |> Stdout.line
+                |> Task.await
 
-          rucksacks
+            rucksacks
             |> groups
             |> List.map groupItem
             |> List.map itemScore
@@ -27,32 +26,28 @@ main =
             |> Num.toStr
             |> Stdout.line
 
-      Err _ ->
-          Stderr.line "could not read input"
-
-
+        Err _ ->
+            Stderr.line "could not read input"
 
 parse : Str -> List Rucksack
 parse = \lines ->
     lines
-        |> Str.split "\n"
-        |> List.dropIf Str.isEmpty
-        |> List.map parseRucksack
-
+    |> Str.split "\n"
+    |> List.dropIf Str.isEmpty
+    |> List.map parseRucksack
 
 groups : List Rucksack -> List Group
 groups = \rucksacks ->
     when rucksacks is
         [a, b, c, ..] ->
             rucksacks
-                |> List.sublist { start: 3, len: List.len rucksacks - 3 }
-                |> groups
-                |> List.prepend { a, b, c }
+            |> List.sublist { start: 3, len: List.len rucksacks - 3 }
+            |> groups
+            |> List.prepend { a, b, c }
 
         _ -> []
 
-
-Group : { a: Rucksack, b: Rucksack, c: Rucksack }
+Group : { a : Rucksack, b : Rucksack, c : Rucksack }
 
 groupItem : Group -> Item
 groupItem = \{ a, b, c } ->
@@ -60,8 +55,8 @@ groupItem = \{ a, b, c } ->
     repeatedABC = repeatedItems (repeatedAB) (toItems c)
 
     repeatedABC
-        |> List.first
-        |> Result.withDefault ""
+    |> List.first
+    |> Result.withDefault ""
 
 Rucksack : { left : Compartment, right : Compartment }
 
@@ -70,18 +65,17 @@ parseRucksack = \items ->
     graphemes = Str.graphemes items
     compartmentSize = List.len graphemes // 2
 
-    { left: List.sublist graphemes { start: 0, len: compartmentSize }
-    , right: List.sublist graphemes { start: compartmentSize, len: compartmentSize }
+    {
+        left: List.sublist graphemes { start: 0, len: compartmentSize },
+        right: List.sublist graphemes { start: compartmentSize, len: compartmentSize },
     }
-
 
 repeatedItem : Rucksack -> Item
 repeatedItem = \{ left, right } ->
-      left
-        |> repeatedItems right
-        |> List.first
-        |> Result.withDefault ""
-
+    left
+    |> repeatedItems right
+    |> List.first
+    |> Result.withDefault ""
 
 toItems : Rucksack -> List Item
 toItems = \{ left, right } -> List.concat right left
