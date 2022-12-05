@@ -16,7 +16,10 @@ main =
                 |> Stdout.line
                 |> Task.await
 
-            Stdout.line "part 2"
+            program
+            |> run9001
+            |> topCrates
+            |> Stdout.line
 
         Err _ ->
             Stderr.line "could not read input"
@@ -51,7 +54,13 @@ parse = \lines ->
         _ -> crash "invalid input"
 
 run : Program -> List Stack
-run = \{ stacks, instructions } ->
+run = \program -> runHelper program List.reverse
+
+run9001 : Program -> List Stack
+run9001 = \program -> runHelper program (\x -> x)
+
+runHelper : Program, (List Str -> List Str) -> List Stack
+runHelper = \{ stacks, instructions }, moveMap ->
     when instructions is
         [] -> stacks
         [instruction, ..] ->
@@ -66,14 +75,14 @@ run = \{ stacks, instructions } ->
             }
 
             # Weird bug if I don't recreate the list here
-            newTo = List.concat (List.walk to [] List.append) (List.reverse cratesToMove)
+            newTo = List.concat (List.walk to [] List.append) (moveMap cratesToMove)
 
             newStacks =
                 stacks
                 |> List.set (instruction.from - 1) newFrom
                 |> List.set (instruction.to - 1) newTo
 
-            run { stacks: newStacks, instructions: List.dropFirst instructions }
+            runHelper { stacks: newStacks, instructions: List.dropFirst instructions } moveMap
 
 topCrates : List Stack -> Str
 topCrates = \stacks ->
