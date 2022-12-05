@@ -1,4 +1,4 @@
-app "02-rucksack-reorganization"
+app "03-rucksack-reorganization"
     packages { pf: "https://github.com/roc-lang/basic-cli/releases/download/0.1.1/zAoiC9xtQPHywYk350_b7ust04BmWLW00sjb9ZPtSQk.tar.br" }
     imports [pf.Stdout, pf.Stderr, pf.Task, pf.File, pf.Path]
     provides [main] to pf
