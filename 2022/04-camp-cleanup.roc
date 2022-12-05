@@ -17,7 +17,11 @@ main =
                 |> Stdout.line
                 |> Task.await
 
-            Stdout.line "part 2"
+            assignments
+            |> List.keepIf hasOverlap
+            |> List.len
+            |> Num.toStr
+            |> Stdout.line
 
         Err _ ->
             Stderr.line "could not read input"
@@ -41,6 +45,10 @@ isInefficient : Assignment -> Bool
 isInefficient = \{ left, right } ->
     contains left right || contains right left
 
+hasOverlap : Assignment -> Bool
+hasOverlap = \{ left, right } ->
+    overlaps left right || overlaps right left
+
 Range : { start : U32, end : U32 }
 
 parseRange : Str -> Range
@@ -57,6 +65,10 @@ parseRange = \input ->
 contains : Range, Range -> Bool
 contains = \a, b ->
     a.start <= b.start && a.end >= b.end
+
+overlaps : Range, Range -> Bool
+overlaps = \a, b ->
+    a.start >= b.start && a.start <= b.end || a.end >= b.start && a.end <= b.end
 
 unwrap : Result a _, Str -> a
 unwrap = \result, expectation ->
