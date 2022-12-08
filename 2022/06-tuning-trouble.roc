@@ -16,7 +16,10 @@ main =
                 |> Stdout.line
                 |> Task.await
 
-            Stdout.line "part 2"
+            buffer
+            |> startOfMessage
+            |> Num.toStr
+            |> Stdout.line
 
         Err _ ->
             Stderr.line "could not read input"
@@ -39,3 +42,67 @@ startOfPacket = \buffer ->
                 1 + startOfPacket (List.dropFirst buffer)
 
         _ -> crash "no start of packet found!"
+
+startOfMessage : Buffer -> Num a
+startOfMessage = \input ->
+    startOfMessageHelper : Buffer, Dict Str (Num a), List Str -> Num a
+    startOfMessageHelper = \buffer, occurrences, pending ->
+        when buffer is
+            [a, ..] ->
+                newOccurrences =
+                    occurrences
+                    |> Dict.update
+                        a
+                        (\value ->
+                            when value is
+                                Missing -> Present 1
+                                Present v -> Present (v + 1)
+                        )
+
+                newPending = pending |> List.append a
+
+                finalOccurrences =
+                    if List.len newPending > 14 then
+                        characterToDiscard = List.first newPending |> unwrap "impossible!"
+
+                        newOccurrences
+                        |> Dict.update
+                            characterToDiscard
+                            (\value ->
+                                when value is
+                                    Missing -> crash "should not happen!"
+                                    Present v -> if v - 1 == 0 then Present 0 else Present (v - 1)
+                            )
+                    else
+                        newOccurrences
+
+                finalPending =
+                    if List.len newPending > 14 then
+                        List.dropFirst newPending
+                    else
+                        newPending
+
+                uniqueOccurrences =
+                    finalOccurrences
+                    |> Dict.walk
+                        0
+                        (\total, _, n ->
+                            if n == 1 then
+                                total + 1
+                            else
+                                total)
+
+                if uniqueOccurrences == 14 then
+                    1
+                else
+                    1 + startOfMessageHelper (List.dropFirst buffer) finalOccurrences finalPending
+
+            [] -> crash "no start of message found!"
+
+    startOfMessageHelper input Dict.empty []
+
+unwrap : Result a _, Str -> a
+unwrap = \result, expectation ->
+    when result is
+        Ok a -> a
+        Err _ -> crash expectation
