@@ -75,7 +75,7 @@ runHelper = \{ stacks, instructions }, moveMap ->
             }
 
             # Weird bug if I don't recreate the list here
-            newTo = List.concat (List.walk to [] List.append) (moveMap cratesToMove)
+            newTo = List.concat to (moveMap cratesToMove)
 
             newStacks =
                 stacks
