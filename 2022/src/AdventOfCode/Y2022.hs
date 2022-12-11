@@ -4,6 +4,7 @@ module AdventOfCode.Y2022
 
 import qualified AdventOfCode
 import qualified AdventOfCode.Y2022.NoSpaceLeftOnDevice as NoSpaceLeftOnDevice
+import qualified AdventOfCode.Y2022.TreetopTreeHouse as TreetopTreeHouse
 
 
 year :: AdventOfCode.Year
@@ -16,4 +17,5 @@ year =
         , AdventOfCode.todo
         , AdventOfCode.todo
         , NoSpaceLeftOnDevice.day
+        , TreetopTreeHouse.day
         ]
