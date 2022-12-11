@@ -14,7 +14,7 @@ day =
             countVisible . parse
 
         part2 =
-            const 0
+            maximum . scenicScores . parse
 
 
 newtype Forest
@@ -33,22 +33,36 @@ countVisible forest@(Forest trees) =
 
 isVisible :: Forest -> ( Position, Tree ) -> Bool
 isVisible forest ( position, tree ) =
-    tree > (minimum $ map maximum $ pathsToEdges forest position)
+    case map maximum $ filter (not . List.null) $ pathsToEdges forest position of
+        [] ->
+            True
+
+        paths ->
+            tree > minimum paths
+
+
+scenicScores :: Forest -> [Int]
+scenicScores forest@(Forest trees) =
+    concatMap (fmap (scenicScore forest)) $ withPositions trees
+
+
+scenicScore :: Forest -> ( Position, Tree ) -> Int
+scenicScore forest ( position, tree ) =
+    product $ fmap (length . takeWhileInclusive (< tree)) $ pathsToEdges forest position
+    where
+        takeWhileInclusive _ [] =
+            []
+        takeWhileInclusive p (x : xs) =
+            x : if p x then takeWhileInclusive p xs else []
 
 
 pathsToEdges :: Forest -> Position -> [[Tree]]
 pathsToEdges (Forest trees) (Position i j) =
-    map visibleEdge
-        [ take j (trees !! i)
-        , drop (j + 1) (trees !! i)
-        , take i $ (List.transpose trees) !! j
-        , drop (i + 1) $ (List.transpose trees) !! j
-        ]
-    where
-        visibleEdge [] =
-            [ Tree (-1) ]
-        visibleEdge x =
-            x
+    [ reverse $ take j (trees !! i)
+    , drop (j + 1) (trees !! i)
+    , reverse $ take i $ (List.transpose trees) !! j
+    , drop (i + 1) $ (List.transpose trees) !! j
+    ]
 
 
 newtype Tree
