@@ -111,7 +111,7 @@ parseCommand input =
             error "invalid command!"
     where
         isFile =
-            (/=) [ "dir" ] . take 1 . List.splitOn " "
+            (/=) "dir" . head . words
 
 
 run :: Directory -> [Command] -> ( Directory, [Command] )
