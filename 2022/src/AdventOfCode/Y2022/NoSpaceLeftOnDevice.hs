@@ -5,6 +5,7 @@ module AdventOfCode.Y2022.NoSpaceLeftOnDevice
     ) where
 
 import qualified AdventOfCode
+import qualified Data.List as List
 import qualified Data.List.Split as List
 
 
@@ -15,8 +16,26 @@ day =
         part1 =
             sum . filter (<= 100000) . directorySizes . parse
 
-        part2 _ =
-            0
+        part2 input =
+            head $ List.sort $ filter (> spaceToFree) $ directorySizes root
+            where
+                root =
+                    parse input
+
+                totalSpace =
+                    70000000
+
+                neededSpace =
+                    30000000
+
+                usedSpace =
+                    directorySize root
+
+                unusedSpace =
+                    totalSpace - usedSpace
+
+                spaceToFree =
+                    neededSpace - unusedSpace
 
 
 data Directory
