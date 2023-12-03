@@ -18,12 +18,14 @@ description:         Please see the README on GitHub at <https://github.com/gith
 dependencies:
 - base >= 4.7 && < 5
 - advent-of-code
+- text
 
 ghc-options:
   - -W
 
 library:
   source-dirs: src
+  default-extensions: OverloadedStrings, TupleSections
 
 executables:
   aoc-2023:
