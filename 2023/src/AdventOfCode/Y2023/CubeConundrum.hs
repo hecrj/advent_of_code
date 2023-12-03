@@ -17,7 +17,8 @@ part1 =
 
 
 part2 :: AdventOfCode.Solution
-part2 = const 0
+part2 =
+    sum . fmap (power . smallestBag) . fmap parse . lines
 
 
 data Game = Game
@@ -40,10 +41,17 @@ isPossible (Game _ rounds) =
     all isRoundPossible rounds
 
 
+smallestBag :: Game -> Bag
+smallestBag (Game _ rounds) =
+    Bag (max red) (max green) (max blue)
+  where
+    max f = maximum $ fmap f rounds
+
+
 data Round = Round
-    { _red :: Int
-    , _green :: Int
-    , _blue :: Int
+    { red :: Int
+    , green :: Int
+    , blue :: Int
     }
 
 
@@ -59,3 +67,15 @@ parseRound round =
 isRoundPossible :: Round -> Bool
 isRoundPossible (Round red green blue) =
     red <= 12 && green <= 13 && blue <= 14
+
+
+data Bag = Bag
+    { _red :: Int
+    , _green :: Int
+    , _blue :: Int
+    }
+
+
+power :: Bag -> Int
+power (Bag red green blue) =
+    red * green * blue
