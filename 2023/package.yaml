@@ -20,6 +20,7 @@ dependencies:
 - advent-of-code
 - text
 - split
+- relude
 
 ghc-options:
   - -W
