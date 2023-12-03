@@ -19,13 +19,14 @@ dependencies:
 - base >= 4.7 && < 5
 - advent-of-code
 - text
+- split
 
 ghc-options:
   - -W
 
 library:
   source-dirs: src
-  default-extensions: OverloadedStrings, TupleSections
+  default-extensions: OverloadedStrings, TupleSections, DisambiguateRecordFields, DuplicateRecordFields
 
 executables:
   aoc-2023:
