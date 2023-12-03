@@ -1,11 +1,9 @@
-{-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 module AdventOfCode.Y2022.NoSpaceLeftOnDevice
     ( day
     ) where
 
 import qualified AdventOfCode
-import qualified Data.List as List
 import qualified Data.List.Split as List
 
 
@@ -17,7 +15,7 @@ day =
             sum . filter (<= 100000) . directorySizes . parse
 
         part2 input =
-            head $ List.sort $ filter (> spaceToFree) $ directorySizes root
+            minimum $ filter (> spaceToFree) $ directorySizes root
             where
                 root =
                     parse input
@@ -49,7 +47,7 @@ parse =
         . run (Directory "/" [] [])
             . map parseCommand
                 . drop 1
-                    . filter ((/=) "")
+                    . filter ("" /=)
                         . List.splitOn "$ "
 
 
