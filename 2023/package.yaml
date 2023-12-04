@@ -21,6 +21,8 @@ dependencies:
 - text
 - split
 - relude
+- containers
+- flow
 
 ghc-options:
   - -W

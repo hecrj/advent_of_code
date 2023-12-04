@@ -1,8 +1,11 @@
 module AdventOfCode.Y2023.Scratchcards (day) where
 
 import qualified AdventOfCode
+import qualified Data.IntMap.Strict as IntMap
 import qualified Data.List as List
 import qualified Data.List.Split as List
+
+import Data.Maybe (fromMaybe)
 
 
 day :: AdventOfCode.Day
@@ -17,7 +20,7 @@ part1 =
 
 part2 :: AdventOfCode.Solution
 part2 =
-    const 0
+    count . fmap parse . lines
 
 
 data Card = Card
@@ -45,3 +48,25 @@ score (Card targets numbers) =
         if null winning
             then 0
             else 2 ^ (List.length winning - 1)
+
+
+count :: [Card] -> Int
+count =
+    sum . IntMap.elems . count' IntMap.empty . zip [0 ..]
+  where
+    count' record [] = record
+    count' record ((i, Card targets numbers) : rest) =
+        let
+            currentOneAnnotated = IntMap.insertWith (+) i 1 record
+
+            amount = fromMaybe 0 (IntMap.lookup i currentOneAnnotated)
+
+            winning = List.intersect numbers targets
+
+            winsPropagated =
+                foldr
+                    (\i -> IntMap.insertWith (+) i amount)
+                    currentOneAnnotated
+                    [i + 1 .. i + List.length winning]
+        in
+            count' winsPropagated rest
