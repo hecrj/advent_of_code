@@ -6,6 +6,7 @@ where
 import qualified AdventOfCode
 import qualified AdventOfCode.Y2023.CubeConundrum as CubeConundrum
 import qualified AdventOfCode.Y2023.GearRatios as GearRatios
+import qualified AdventOfCode.Y2023.IfYouGiveASeedAFertilizer as IfYouGiveASeedAFertilizer
 import qualified AdventOfCode.Y2023.Scratchcards as Scratchcards
 import qualified AdventOfCode.Y2023.Trebuchet as Trebuchet
 
@@ -18,4 +19,5 @@ year =
         , CubeConundrum.day
         , GearRatios.day
         , Scratchcards.day
+        , IfYouGiveASeedAFertilizer.day
         ]

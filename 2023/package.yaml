@@ -29,7 +29,7 @@ ghc-options:
 
 library:
   source-dirs: src
-  default-extensions: OverloadedStrings, TupleSections, DisambiguateRecordFields, DuplicateRecordFields
+  default-extensions: OverloadedStrings, TupleSections, DisambiguateRecordFields, DuplicateRecordFields, GeneralizedNewtypeDeriving, DerivingStrategies
 
 executables:
   aoc-2023:
